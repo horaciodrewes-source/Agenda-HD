@@ -441,7 +441,7 @@ $("#f-task").addEventListener("submit", e=>{
   store.put({...base, text, date:$("#task-date").value||"", prio:Number($("#task-prio").value), voice: base.voice||dictated.has("task-text")});
   toast(editTask?"Tarea actualizada":"Tarea guardada"); resetTaskForm();
 });
-function resetTaskForm(){ editTask=null; $("#f-task").reset(); $("#task-date").value=isoToday(); dictated.delete("task-text");
+function resetTaskForm(){ editTask=null; $("#f-task").reset(); $("#task-date").value=""; dictated.delete("task-text");
   $("#f-task-title").textContent="Nueva tarea"; $("#task-submit").textContent="Guardar tarea"; $("#task-cancel").hidden=true; }
 $("#task-cancel").onclick = resetTaskForm;
 

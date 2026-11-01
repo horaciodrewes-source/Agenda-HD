@@ -1,0 +1,473 @@
+<title>Agenda de Horacio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: una columna para el celular, encabezado fijo, pestañas grandes, formulario arriba de cada lista. Mismo estilo que la Tarjeta de Golf. */
+/* Fondo negro a propósito: en pantallas OLED lo negro va apagado y gasta menos batería. */
+:root{
+  --bg:#000000; --surface:#0c0e0d; --ink:#eef3ef; --muted:#93a399; --line:#262c28;
+  --accent:#2f8a57; --accent-ink:#ffffff; --accent-soft:#0e2417; --flag:#e8b923;
+  --ok:#2f8a57; --danger:#e0695c; --danger-soft:#2a1412;
+  --t-reunion:#6f9be8; --t-medico:#e0695c; --t-cumple:#e57bbf; --t-trabajo:#e8b923; --t-viaje:#3fc1ad; --t-social:#b9a6ec; --t-otro:#93a399;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Source Sans 3",-apple-system,system-ui,sans-serif;
+  --r:10px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45}
+.wrap{max-width:560px;margin:0 auto;padding-block:0 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+h1{font:700 1.75rem/1 var(--display);margin:0;letter-spacing:.02em;text-transform:uppercase}
+.today{color:var(--muted);font-size:.95rem}
+.tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px}
+.tabs a{flex:1;text-align:center;padding:10px 12px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:700;font-family:var(--display);font-size:1.25rem;text-transform:uppercase;letter-spacing:.03em}
+.tabs a[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
+.tabs .n{font-family:var(--body);font-weight:400;font-size:.85rem;opacity:.85;margin-left:4px}
+form.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+h2{font:700 1.35rem/1.1 var(--display);margin:0;text-transform:uppercase;letter-spacing:.02em}
+label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);font-weight:700;letter-spacing:.02em;min-width:0}
+input,textarea,select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:84px}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--flag);outline-offset:2px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.textbox{position:relative}
+.textbox textarea{padding-right:58px}
+.mic{position:absolute;right:8px;top:8px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--accent);cursor:pointer;display:grid;place-items:center}
+.mic svg{width:20px;height:20px}
+.mic.on{background:var(--danger);color:var(--bg);border-color:var(--danger);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--danger) 25%,transparent)}}
+@media (prefers-reduced-motion:reduce){.mic.on{animation:none}}
+.hint{font-size:.85rem;color:var(--muted);margin:0}
+.hint.warn{color:var(--danger)}
+.hint:empty{display:none}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font:inherit;cursor:pointer;border-radius:10px;min-height:46px;padding:10px 16px;-webkit-tap-highlight-color:transparent;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:700}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,var(--line))}
+button.danger.solid{background:var(--danger);color:var(--bg);border-color:var(--danger)}
+button.ghost{border-color:transparent;background:transparent;color:var(--muted);padding:8px 10px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;border-radius:0;padding:8px 12px;font-weight:400;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.toolbar select{width:auto;padding:8px 10px;background:var(--surface)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:6px 12px;border-radius:999px;font-weight:400;font-size:.9rem;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--c,var(--t-otro));flex:none}
+ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
+.item .main{flex:1;min-width:0}
+.item .text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.item.done .text{text-decoration:line-through;color:var(--muted)}
+.meta{display:flex;gap:10px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin-top:4px}
+.meta .late{color:var(--danger);font-weight:700}
+.meta .soon{color:var(--accent);font-weight:700}
+.check{width:28px;height:28px;flex:none;margin-top:1px;accent-color:var(--ok);cursor:pointer}
+.item .btns{display:flex;gap:2px;flex:none}
+.item .btns button{padding:6px 8px}
+.item .btns svg{width:18px;height:18px;display:block}
+.group{display:flex;flex-direction:column;gap:8px}
+.group h3{font-family:var(--display);font-size:1rem;margin:8px 0 0;color:var(--muted);display:flex;align-items:center;gap:8px}
+.group h3 .count{font-family:var(--body);font-weight:400;font-size:.85rem}
+.ev{border-left:5px solid var(--c,var(--t-otro))}
+.ev .when{flex:none;text-align:center;min-width:52px;font-variant-numeric:tabular-nums}
+.ev .when .d{font-family:var(--display);font-size:1.6rem;line-height:1;font-weight:700}
+.ev .when .m{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ev.past{opacity:.7}
+.tag{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--c)}
+.ev a{color:var(--accent)}
+.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:6px}
+.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.empty{text-align:center;color:var(--muted);padding:28px 16px;border:1px dashed var(--line);border-radius:var(--r)}
+.empty strong{display:block;color:var(--ink);font-family:var(--display);font-size:1.1rem;margin-bottom:4px}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--danger-soft);border-radius:8px;padding:8px 10px}
+.status{font-size:.8rem;color:var(--muted);text-align:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;z-index:20}
+@media (max-width:480px){h1{font-size:1.55rem}.item{padding:10px 12px;gap:10px}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Agenda de Horacio</h1>
+    <span class="today" id="today"></span>
+  </header>
+
+  <nav class="tabs" aria-label="Secciones">
+    <a href="#tareas" id="tab-tareas">Tareas <span class="n" id="n-tareas"></span></a>
+    <a href="#eventos" id="tab-eventos">Eventos <span class="n" id="n-eventos"></span></a>
+  </nav>
+
+  <!-- ===== TAREAS ===== -->
+  <section id="view-tareas" class="wrap" style="padding:0;gap:14px">
+    <form class="card" id="f-task" autocomplete="off">
+      <h2 id="f-task-title">Nueva tarea</h2>
+      <div class="textbox">
+        <textarea id="task-text" placeholder="Escribí la tarea o tocá el micrófono para dictarla" required></textarea>
+        <button type="button" class="mic" data-target="task-text" aria-label="Dictar por voz" title="Dictar por voz"></button>
+      </div>
+      <p class="hint" data-hint-for="task-text"></p>
+      <div class="row">
+        <label for="task-date">Fecha<input type="date" id="task-date"></label>
+        <label for="task-prio">Prioridad
+          <select id="task-prio"><option value="2">Normal</option><option value="1">Alta</option><option value="3">Baja</option></select>
+        </label>
+      </div>
+      <div class="actions">
+        <button class="primary" type="submit" id="task-submit">Guardar tarea</button>
+        <button type="button" class="ghost" id="task-cancel" hidden>Cancelar edición</button>
+      </div>
+    </form>
+
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Mostrar">
+        <button type="button" data-tfilter="pend">Pendientes</button>
+        <button type="button" data-tfilter="done">Realizadas</button>
+        <button type="button" data-tfilter="all">Todas</button>
+      </div>
+      <label style="flex-direction:row;align-items:center;gap:8px" for="task-sort">Ordenar
+        <select id="task-sort">
+          <option value="date-asc">Fecha (más próxima primero)</option>
+          <option value="date-desc">Fecha (más lejana primero)</option>
+          <option value="prio">Prioridad</option>
+          <option value="created">Recién agregadas</option>
+          <option value="alpha">Alfabético</option>
+        </select>
+      </label>
+    </div>
+    <ul class="list" id="task-list"></ul>
+    <div id="clear-done-box"></div>
+  </section>
+
+  <!-- ===== EVENTOS ===== -->
+  <section id="view-eventos" class="wrap" style="padding:0;gap:14px" hidden>
+    <form class="card" id="f-ev" autocomplete="off">
+      <h2 id="f-ev-title">Nuevo evento</h2>
+      <div class="textbox">
+        <textarea id="ev-text" placeholder="Descripción del evento (podés dictarla)" required></textarea>
+        <button type="button" class="mic" data-target="ev-text" aria-label="Dictar por voz" title="Dictar por voz"></button>
+      </div>
+      <p class="hint" data-hint-for="ev-text"></p>
+      <div class="row">
+        <label for="ev-date">Fecha<input type="date" id="ev-date" required></label>
+        <label for="ev-time">Hora (opcional)<input type="time" id="ev-time"></label>
+      </div>
+      <div class="row">
+        <label for="ev-place">Ubicación<input type="text" id="ev-place" placeholder="Ej.: Av. Olazábal 4261, CABA"></label>
+        <label for="ev-type">Tipo de evento<select id="ev-type"></select></label>
+      </div>
+      <div class="actions">
+        <button class="primary" type="submit" id="ev-submit">Guardar evento</button>
+        <button type="button" class="ghost" id="ev-cancel" hidden>Cancelar edición</button>
+      </div>
+    </form>
+
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Vista">
+        <button type="button" data-eview="time">Línea de tiempo</button>
+        <button type="button" data-eview="type">Por tipo</button>
+      </div>
+      <div class="seg" role="group" aria-label="Período">
+        <button type="button" data-eperiod="next">Próximos</button>
+        <button type="button" data-eperiod="past">Pasados</button>
+        <button type="button" data-eperiod="all">Todos</button>
+      </div>
+    </div>
+    <div class="chips" id="ev-chips" role="group" aria-label="Filtrar por tipo"></div>
+    <div id="ev-list" class="group"></div>
+  </section>
+
+  <p class="status" id="status"></p>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const TYPES = [
+  {id:"reunion", name:"Reunión", c:"--t-reunion"},
+  {id:"trabajo", name:"Trabajo / Cliente", c:"--t-trabajo"},
+  {id:"medico", name:"Médico / Salud", c:"--t-medico"},
+  {id:"cumple", name:"Cumpleaños", c:"--t-cumple"},
+  {id:"viaje", name:"Viaje", c:"--t-viaje"},
+  {id:"social", name:"Social / Familia", c:"--t-social"},
+  {id:"otro", name:"Otro", c:"--t-otro"},
+];
+const typeOf = id => TYPES.find(t=>t.id===id) || TYPES[TYPES.length-1];
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const ICON = {
+  mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>'
+};
+
+/* ---------- fechas ---------- */
+const pad = n => String(n).padStart(2,"0");
+const isoToday = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const parseISO = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const dayDiff = s => Math.round((parseISO(s)-parseISO(isoToday()))/86400000);
+const fmtLong = s => parseISO(s).toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+const fmtShort = s => parseISO(s).toLocaleDateString("es-AR",{weekday:"short",day:"numeric",month:"short"});
+function relLabel(s){
+  const d=dayDiff(s);
+  if(d===0) return "Hoy"; if(d===1) return "Mañana"; if(d===-1) return "Ayer";
+  if(d>1 && d<7) return `En ${d} días`; if(d<0) return `Hace ${-d} días`;
+  return "";
+}
+$("#today").textContent = fmtLong(isoToday()).replace(/^./,c=>c.toUpperCase());
+
+/* ---------- almacenamiento: base de datos privada de Claude, o el navegador ---------- */
+const LS_KEY = "agenda-horacio-v1", LS_DEL = "agenda-horacio-borrados";
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)||"[]"); }catch{ return []; } }
+function lsSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const setStatus = t => { $("#status").textContent = t; };
+
+/* Siempre se guarda en el teléfono. Si la app está abierta dentro de Claude, además se copia a tu cuenta. */
+let items = lsGet(LS_KEY);       // {id, kind:"task"|"event", updatedAt, ...}
+let deleted = lsGet(LS_DEL);
+let col = null, dirty = new Set(), flushing = false, fTimer = null;
+const store = {
+  put(it){ it = {...it, updatedAt: Date.now()};
+    const i = items.findIndex(x=>x.id===it.id); if(i>=0) items[i]=it; else items.push(it);
+    lsSet(LS_KEY, items); dirty.add(it.id); schedule(); render(); },
+  remove(id){ items = items.filter(x=>x.id!==id); lsSet(LS_KEY, items);
+    if(col && !deleted.includes(id)){ deleted.push(id); lsSet(LS_DEL, deleted); }
+    dirty.delete(id); schedule(); render(); }
+};
+function schedule(){ if(!col) return; clearTimeout(fTimer); fTimer = setTimeout(flush, 600); }
+async function flush(){
+  if(!col || flushing) return; flushing = true;
+  try{
+    for(const id of [...deleted]){ await col.doc(id).delete(); deleted = deleted.filter(x=>x!==id); lsSet(LS_DEL, deleted); }
+    for(const id of [...dirty]){ dirty.delete(id); const it = items.find(x=>x.id===id);
+      if(it){ const {id:_, ...body} = it; await col.doc(id).set(JSON.parse(JSON.stringify(body))); } }
+    setStatus("Guardado en el teléfono y en tu cuenta.");
+  }catch{ setStatus("Guardado en este teléfono."); }
+  flushing = false; if(dirty.size || deleted.length) fTimer = setTimeout(flush, 3000);
+}
+addEventListener("online", ()=>flush());
+
+async function init(){
+  setStatus("Guardado en este teléfono.");
+  render();
+  for(let i=0; i<30 && !window.claude?.use; i++) await new Promise(r=>setTimeout(r,100));
+  if(!window.claude?.use) return;
+  try{
+    const [d,u] = await Promise.all([claude.use("db"), claude.use("user")]);
+    if(!d || !u) return;
+    const me = await u.id(); if(!me) return;
+    col = d.collection("data/users/"+me);
+    const snap = await col.get();
+    const remote = new Map(snap.docs.map(x=>[x.id, x.data()]));
+    let changed = false;
+    for(const [id,r] of remote){
+      if(!r || deleted.includes(id)) continue;
+      const i = items.findIndex(x=>x.id===id);
+      if(i<0){ items.push({id, ...r}); changed = true; }
+      else if((r.updatedAt||0) > (items[i].updatedAt||0)){ items[i] = {id, ...r}; changed = true; }
+    }
+    for(const it of items){ const r = remote.get(it.id); if(!r || (it.updatedAt||0) > (r.updatedAt||0)) dirty.add(it.id); }
+    if(changed){ lsSet(LS_KEY, items); render(); }
+    setStatus("Guardado en el teléfono y en tu cuenta.");
+    flush();
+  }catch{ setStatus("Guardado en este teléfono."); }
+}
+
+/* ---------- estado de la interfaz ---------- */
+const ui = (()=>{ let s={}; try{ s=JSON.parse(localStorage.getItem("agenda-ui")||"{}"); }catch{}
+  return Object.assign({tfilter:"pend", tsort:"date-asc", eview:"time", eperiod:"next", etypes:[]}, s); })();
+const saveUI = () => { try{ localStorage.setItem("agenda-ui", JSON.stringify(ui)); }catch{} };
+let editTask=null, editEv=null, confirmClear=false, confirmDel=null;
+
+/* ---------- navegación ---------- */
+function route(){
+  const v = location.hash==="#eventos" ? "eventos" : "tareas";
+  $("#view-tareas").hidden = v!=="tareas";
+  $("#view-eventos").hidden = v!=="eventos";
+  $("#tab-tareas").toggleAttribute("aria-current", v==="tareas"); if(v==="tareas") $("#tab-tareas").setAttribute("aria-current","page");
+  $("#tab-eventos").toggleAttribute("aria-current", v==="eventos"); if(v==="eventos") $("#tab-eventos").setAttribute("aria-current","page");
+}
+addEventListener("hashchange", route);
+
+/* ---------- render ---------- */
+function esc(s){ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+const PRIO = {1:"Alta",2:"Normal",3:"Baja"};
+
+function render(){
+  const tasks = items.filter(i=>i.kind==="task");
+  const evs = items.filter(i=>i.kind==="event");
+  $("#n-tareas").textContent = tasks.filter(t=>!t.done).length ? `(${tasks.filter(t=>!t.done).length})` : "";
+  $("#n-eventos").textContent = evs.filter(e=>dayDiff(e.date)>=0).length ? `(${evs.filter(e=>dayDiff(e.date)>=0).length})` : "";
+  renderTasks(tasks); renderEvents(evs);
+}
+
+function renderTasks(tasks){
+  $$("[data-tfilter]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tfilter===ui.tfilter));
+  $("#task-sort").value = ui.tsort;
+  let list = tasks.filter(t => ui.tfilter==="all" || (ui.tfilter==="done" ? t.done : !t.done));
+  const byDate = (a,b)=> (a.date||"9999").localeCompare(b.date||"9999");
+  const sorters = {
+    "date-asc": byDate,
+    "date-desc": (a,b)=> -byDate(a,b),
+    "prio": (a,b)=> (a.prio||2)-(b.prio||2) || byDate(a,b),
+    "created": (a,b)=> (b.created||0)-(a.created||0),
+    "alpha": (a,b)=> a.text.localeCompare(b.text,"es"),
+  };
+  list.sort(sorters[ui.tsort]||byDate);
+  if(ui.tfilter!=="done" && ui.tsort!=="created" && ui.tsort!=="alpha") list.sort((a,b)=>(a.done?1:0)-(b.done?1:0));
+  const ul = $("#task-list");
+  if(!list.length){
+    ul.innerHTML = `<li class="empty"><strong>${ui.tfilter==="done"?"Todavía no marcaste tareas como realizadas":"No hay tareas pendientes"}</strong>Escribí o dictá una tarea arriba y tocá “Guardar tarea”.</li>`;
+  } else ul.innerHTML = list.map(t=>{
+    const rel = t.date ? relLabel(t.date) : "";
+    const late = t.date && !t.done && dayDiff(t.date)<0;
+    return `<li class="item ${t.done?"done":""}">
+      <input type="checkbox" class="check" data-toggle="${t.id}" ${t.done?"checked":""} aria-label="Marcar como realizada">
+      <div class="main">
+        <p class="text">${esc(t.text)}</p>
+        <div class="meta">
+          ${t.date?`<span class="${late?"late":(dayDiff(t.date)<=1&&!t.done?"soon":"")}">${fmtShort(t.date)}${rel?" · "+rel:""}${late?" · vencida":""}</span>`:"<span>Sin fecha</span>"}
+          ${t.prio&&t.prio!=2?`<span>Prioridad ${PRIO[t.prio]}</span>`:""}
+          ${t.voice?`<span>Dictada</span>`:""}
+        </div>
+        ${confirmDel===t.id?`<div class="confirm" style="margin-top:8px">¿Borrar esta tarea? <button class="danger solid" data-del-yes="${t.id}">Borrar</button><button class="ghost" data-del-no>No</button></div>`:""}
+      </div>
+      <div class="btns">
+        <button class="ghost" data-edit-task="${t.id}" aria-label="Editar" title="Editar">${ICON.edit}</button>
+        <button class="ghost" data-del="${t.id}" aria-label="Borrar" title="Borrar">${ICON.del}</button>
+      </div></li>`;
+  }).join("");
+  const nDone = tasks.filter(t=>t.done).length;
+  $("#clear-done-box").innerHTML = !nDone ? "" : confirmClear
+    ? `<div class="confirm">¿Borrar las ${nDone} tareas realizadas? No se puede deshacer. <button class="danger solid" id="clear-yes">Sí, borrar</button><button class="ghost" id="clear-no">Cancelar</button></div>`
+    : `<button class="danger" id="clear-done">Borrar las realizadas (${nDone})</button>`;
+}
+
+function renderEvents(evs){
+  $$("[data-eview]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.eview===ui.eview));
+  $$("[data-eperiod]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.eperiod===ui.eperiod));
+  $("#ev-chips").innerHTML = `<button type="button" class="chip" data-etype="" aria-pressed="${!ui.etypes.length}">Todos los tipos</button>` +
+    TYPES.map(t=>{ const n=evs.filter(e=>e.type===t.id).length;
+      return `<button type="button" class="chip" data-etype="${t.id}" aria-pressed="${ui.etypes.includes(t.id)}" style="--c:var(${t.c})"><span class="dot"></span>${t.name}${n?` · ${n}`:""}</button>`; }).join("");
+
+  let list = evs.filter(e => !ui.etypes.length || ui.etypes.includes(e.type));
+  list = list.filter(e => ui.eperiod==="all" || (ui.eperiod==="next" ? dayDiff(e.date)>=0 : dayDiff(e.date)<0));
+  const key = e => e.date+"T"+(e.time||"00:00");
+  list.sort((a,b)=> ui.eperiod==="past" ? key(b).localeCompare(key(a)) : key(a).localeCompare(key(b)));
+  const box = $("#ev-list");
+  if(!list.length){
+    box.innerHTML = `<div class="empty"><strong>${evs.length?"No hay eventos con este filtro":"Todavía no hay eventos"}</strong>${evs.length?"Probá con otro tipo o período.":"Cargá la descripción, la fecha, la ubicación y el tipo arriba."}</div>`;
+    return;
+  }
+  const card = e => { const t=typeOf(e.type); const d=parseISO(e.date); const rel=relLabel(e.date);
+    return `<li class="item ev ${dayDiff(e.date)<0?"past":""}" style="--c:var(${t.c})">
+      <div class="when"><div class="d">${d.getDate()}</div><div class="m">${d.toLocaleDateString("es-AR",{month:"short"}).replace(".","")}</div></div>
+      <div class="main">
+        <p class="text">${esc(e.text)}</p>
+        <div class="meta">
+          <span class="tag"><span class="dot"></span>${t.name}</span>
+          <span>${d.toLocaleDateString("es-AR",{weekday:"long"})}${e.time?" · "+e.time+" h":""}${rel?" · <b>"+rel+"</b>":""}</span>
+          ${e.place?`<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.place)}" target="_blank" rel="noopener">${esc(e.place)}</a>`:""}
+        </div>
+        ${confirmDel===e.id?`<div class="confirm" style="margin-top:8px">¿Borrar este evento? <button class="danger solid" data-del-yes="${e.id}">Borrar</button><button class="ghost" data-del-no>No</button></div>`:""}
+      </div>
+      <div class="btns">
+        <button class="ghost" data-edit-ev="${e.id}" aria-label="Editar" title="Editar">${ICON.edit}</button>
+        <button class="ghost" data-del="${e.id}" aria-label="Borrar" title="Borrar">${ICON.del}</button>
+      </div></li>`; };
+
+  const groups = new Map();
+  if(ui.eview==="type"){
+    TYPES.forEach(t=>{ const g=list.filter(e=>e.type===t.id); if(g.length) groups.set(`<span class="dot" style="--c:var(${t.c})"></span>${t.name}`, g); });
+  } else {
+    list.forEach(e=>{ const k=parseISO(e.date).toLocaleDateString("es-AR",{month:"long",year:"numeric"}).replace(/^./,c=>c.toUpperCase()); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(e); });
+  }
+  box.innerHTML = [...groups].map(([k,g])=>`<div class="group"><h3>${k} <span class="count">${g.length}</span></h3><ul class="list">${g.map(card).join("")}</ul></div>`).join("");
+}
+
+/* ---------- acciones ---------- */
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true,2200); }
+const dictated = new Set();
+
+$("#f-task").addEventListener("submit", e=>{
+  e.preventDefault(); stopMic();
+  const text=$("#task-text").value.trim(); if(!text) return;
+  const base = editTask ? items.find(i=>i.id===editTask) : {id:uid(), kind:"task", done:false, created:Date.now()};
+  store.put({...base, text, date:$("#task-date").value||"", prio:Number($("#task-prio").value), voice: base.voice||dictated.has("task-text")});
+  toast(editTask?"Tarea actualizada":"Tarea guardada"); resetTaskForm();
+});
+function resetTaskForm(){ editTask=null; $("#f-task").reset(); $("#task-date").value=isoToday(); dictated.delete("task-text");
+  $("#f-task-title").textContent="Nueva tarea"; $("#task-submit").textContent="Guardar tarea"; $("#task-cancel").hidden=true; }
+$("#task-cancel").onclick = resetTaskForm;
+
+$("#f-ev").addEventListener("submit", e=>{
+  e.preventDefault(); stopMic();
+  const text=$("#ev-text").value.trim(); if(!text) return;
+  const base = editEv ? items.find(i=>i.id===editEv) : {id:uid(), kind:"event", created:Date.now()};
+  store.put({...base, text, date:$("#ev-date").value, time:$("#ev-time").value||"", place:$("#ev-place").value.trim(), type:$("#ev-type").value});
+  toast(editEv?"Evento actualizado":"Evento guardado"); resetEvForm();
+});
+function resetEvForm(){ editEv=null; $("#f-ev").reset(); $("#ev-date").value=isoToday();
+  $("#f-ev-title").textContent="Nuevo evento"; $("#ev-submit").textContent="Guardar evento"; $("#ev-cancel").hidden=true; }
+$("#ev-cancel").onclick = resetEvForm;
+$("#ev-type").innerHTML = TYPES.map(t=>`<option value="${t.id}">${t.name}</option>`).join("");
+
+document.addEventListener("click", e=>{
+  const b = e.target.closest("button,input[data-toggle]"); if(!b) return;
+  const d = b.dataset;
+  if(d.tfilter){ ui.tfilter=d.tfilter; saveUI(); render(); }
+  else if(d.eview){ ui.eview=d.eview; saveUI(); render(); }
+  else if(d.eperiod){ ui.eperiod=d.eperiod; saveUI(); render(); }
+  else if(d.etype!==undefined){ if(!d.etype) ui.etypes=[]; else ui.etypes = ui.etypes.includes(d.etype) ? ui.etypes.filter(x=>x!==d.etype) : [...ui.etypes,d.etype]; saveUI(); render(); }
+  else if(d.toggle){ const t=items.find(i=>i.id===d.toggle); if(t){ store.put({...t, done:!t.done}); if(!t.done) toast("¡Hecha!"); } }
+  else if(d.del){ confirmDel=d.del; render(); }
+  else if(d.delYes){ confirmDel=null; store.remove(d.delYes); toast("Borrado"); }
+  else if(d.delNo!==undefined){ confirmDel=null; render(); }
+  else if(d.editTask){ const t=items.find(i=>i.id===d.editTask); editTask=t.id;
+    $("#task-text").value=t.text; $("#task-date").value=t.date||""; $("#task-prio").value=String(t.prio||2);
+    $("#f-task-title").textContent="Editar tarea"; $("#task-submit").textContent="Guardar cambios"; $("#task-cancel").hidden=false;
+    $("#f-task").scrollIntoView({behavior:"smooth"}); $("#task-text").focus(); }
+  else if(d.editEv){ const t=items.find(i=>i.id===d.editEv); editEv=t.id;
+    $("#ev-text").value=t.text; $("#ev-date").value=t.date; $("#ev-time").value=t.time||""; $("#ev-place").value=t.place||""; $("#ev-type").value=t.type;
+    $("#f-ev-title").textContent="Editar evento"; $("#ev-submit").textContent="Guardar cambios"; $("#ev-cancel").hidden=false;
+    $("#f-ev").scrollIntoView({behavior:"smooth"}); $("#ev-text").focus(); }
+  else if(b.id==="clear-done"){ confirmClear=true; render(); }
+  else if(b.id==="clear-no"){ confirmClear=false; render(); }
+  else if(b.id==="clear-yes"){ confirmClear=false; const done=items.filter(i=>i.kind==="task"&&i.done); done.forEach(t=>store.remove(t.id)); toast(`${done.length} tareas borradas`); }
+});
+$("#task-sort").addEventListener("change", e=>{ ui.tsort=e.target.value; saveUI(); render(); });
+
+/* ---------- dictado por voz ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec=null, recBtn=null;
+const KEYBOARD_TIP = "Para dictar, tocá el micrófono del teclado de tu celular (el teclado convierte la voz en texto).";
+$$(".mic").forEach(btn=>{
+  btn.innerHTML = ICON.mic;
+  btn.addEventListener("click", ()=> recBtn===btn ? stopMic() : startMic(btn));
+});
+function hint(id, msg, warn){ const h=$(`[data-hint-for="${id}"]`); h.textContent=msg; h.classList.toggle("warn",!!warn); }
+function startMic(btn){
+  const id = btn.dataset.target, ta = $("#"+id);
+  if(!SR){ hint(id, KEYBOARD_TIP); ta.focus(); return; }
+  stopMic();
+  rec = new SR(); rec.lang="es-AR"; rec.continuous=true; rec.interimResults=true;
+  const before = ta.value ? ta.value.replace(/\s*$/," ") : "";
+  let finalText="";
+  rec.onresult = ev=>{ let interim="";
+    for(let i=ev.resultIndex;i<ev.results.length;i++){ const r=ev.results[i]; if(r.isFinal) finalText+=r[0].transcript; else interim+=r[0].transcript; }
+    ta.value = before + finalText + interim; dictated.add(id); };
+  rec.onerror = ev=>{ const blocked = ev.error==="not-allowed"||ev.error==="service-not-allowed"||ev.error==="audio-capture";
+    hint(id, blocked ? "Esta pantalla no tiene permiso para usar el micrófono. "+KEYBOARD_TIP : "No se entendió el audio. Probá de nuevo.", true);
+    if(blocked) ta.focus(); };
+  rec.onend = ()=>{ btn.classList.remove("on"); btn.setAttribute("aria-label","Dictar por voz"); if(recBtn===btn){ recBtn=null; rec=null; } };
+  try{ rec.start(); recBtn=btn; btn.classList.add("on"); btn.setAttribute("aria-label","Detener dictado"); hint(id,"Escuchando… hablá y tocá de nuevo el micrófono para terminar."); }
+  catch{ hint(id, KEYBOARD_TIP); ta.focus(); }
+}
+function stopMic(){ if(rec){ try{rec.stop();}catch{} } }
+
+/* ---------- arranque ---------- */
+resetTaskForm(); resetEvForm(); route(); init();
+</script>

@@ -1,69 +1,66 @@
 <!doctype html>
-<html lang="es">
-<head>
+<html lang="es"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-</head>
-<body>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Agenda">
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+</head><body>
 <title>Agenda de Horacio</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
-/* Layout: una columna tipo libreta, pestañas arriba, formulario fijo arriba de cada lista */
+/* Layout: una columna para el celular, encabezado fijo, pestañas grandes, formulario arriba de cada lista. Mismo estilo que la Tarjeta de Golf. */
+/* Fondo negro a propósito: en pantallas OLED lo negro va apagado y gasta menos batería. */
 :root{
-  --bg:#eef1f5; --surface:#ffffff; --ink:#1b2433; --muted:#5d6878; --line:#d5dbe4;
-  --accent:#1f4fa8; --accent-ink:#ffffff; --accent-soft:#e3ebf9;
-  --ok:#2c7a4b; --danger:#b3352b; --danger-soft:#fbe9e7;
-  --t-reunion:#1f4fa8; --t-medico:#b3352b; --t-cumple:#b0157a; --t-trabajo:#6a4c00; --t-viaje:#00796b; --t-social:#7a3fbf; --t-otro:#5d6878;
-  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --bg:#000000; --surface:#0c0e0d; --ink:#eef3ef; --muted:#93a399; --line:#262c28;
+  --accent:#2f8a57; --accent-ink:#ffffff; --accent-soft:#0e2417; --flag:#e8b923;
+  --ok:#2f8a57; --danger:#e0695c; --danger-soft:#2a1412;
+  --t-reunion:#6f9be8; --t-medico:#e0695c; --t-cumple:#e57bbf; --t-trabajo:#e8b923; --t-viaje:#3fc1ad; --t-social:#b9a6ec; --t-otro:#93a399;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Source Sans 3",-apple-system,system-ui,sans-serif;
   --r:10px;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#12161d; --surface:#1b212b; --ink:#e7ebf1; --muted:#9aa5b5; --line:#2e3644;
-  --accent:#7ea6f2; --accent-ink:#0e1420; --accent-soft:#1f2b42;
-  --ok:#6cc792; --danger:#f08a80; --danger-soft:#3a2120;
-  --t-reunion:#7ea6f2; --t-medico:#f08a80; --t-cumple:#f07cc4; --t-trabajo:#e0b84f; --t-viaje:#4fd1bf; --t-social:#b896f0; --t-otro:#9aa5b5;
-  color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#12161d; --surface:#1b212b; --ink:#e7ebf1; --muted:#9aa5b5; --line:#2e3644;
-  --accent:#7ea6f2; --accent-ink:#0e1420; --accent-soft:#1f2b42;
-  --ok:#6cc792; --danger:#f08a80; --danger-soft:#3a2120;
-  --t-reunion:#7ea6f2; --t-medico:#f08a80; --t-cumple:#f07cc4; --t-trabajo:#e0b84f; --t-viaje:#4fd1bf; --t-social:#b896f0; --t-otro:#9aa5b5;
-  color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45}
-.wrap{max-width:760px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
-h1{font-family:var(--display);font-size:1.9rem;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.wrap{max-width:560px;margin:0 auto;padding-block:0 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+h1{font:700 1.75rem/1 var(--display);margin:0;letter-spacing:.02em;text-transform:uppercase}
 .today{color:var(--muted);font-size:.95rem}
 .tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px}
-.tabs a{flex:1;text-align:center;padding:10px 12px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:700;font-family:var(--display);font-size:1.05rem}
+.tabs a{flex:1;text-align:center;padding:10px 12px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:700;font-family:var(--display);font-size:1.25rem;text-transform:uppercase;letter-spacing:.03em}
 .tabs a[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
 .tabs .n{font-family:var(--body);font-weight:400;font-size:.85rem;opacity:.85;margin-left:4px}
 form.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
-h2{font-family:var(--display);font-size:1.15rem;margin:0}
+h2{font:700 1.35rem/1.1 var(--display);margin:0;text-transform:uppercase;letter-spacing:.02em}
 label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);font-weight:700;letter-spacing:.02em;min-width:0}
 input,textarea,select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
 textarea{resize:vertical;min-height:84px}
-input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--flag);outline-offset:2px}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
 .textbox{position:relative}
 .textbox textarea{padding-right:58px}
 .mic{position:absolute;right:8px;top:8px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--accent);cursor:pointer;display:grid;place-items:center}
 .mic svg{width:20px;height:20px}
-.mic.on{background:var(--danger);color:#fff;border-color:var(--danger);animation:pulse 1.2s infinite}
+.mic.on{background:var(--danger);color:var(--bg);border-color:var(--danger);animation:pulse 1.2s infinite}
 @keyframes pulse{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--danger) 25%,transparent)}}
 @media (prefers-reduced-motion:reduce){.mic.on{animation:none}}
 .hint{font-size:.85rem;color:var(--muted);margin:0}
 .hint.warn{color:var(--danger)}
 .hint:empty{display:none}
 .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-button{font:inherit;cursor:pointer;border-radius:8px;padding:10px 16px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:700}
+button{font:inherit;cursor:pointer;border-radius:10px;min-height:46px;padding:10px 16px;-webkit-tap-highlight-color:transparent;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:700}
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 button.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,var(--line))}
-button.danger.solid{background:var(--danger);color:#fff;border-color:var(--danger)}
+button.danger.solid{background:var(--danger);color:var(--bg);border-color:var(--danger)}
 button.ghost{border-color:transparent;background:transparent;color:var(--muted);padding:8px 10px}
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
 .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
@@ -87,7 +84,7 @@ ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;ga
 .item .btns button{padding:6px 8px}
 .item .btns svg{width:18px;height:18px;display:block}
 .group{display:flex;flex-direction:column;gap:8px}
-.group h3{font-family:var(--display);font-size:1rem;margin:8px 0 0;color:var(--muted);display:flex;align-items:center;gap:8px;text-transform:capitalize}
+.group h3{font-family:var(--display);font-size:1rem;margin:8px 0 0;color:var(--muted);display:flex;align-items:center;gap:8px}
 .group h3 .count{font-family:var(--body);font-weight:400;font-size:.85rem}
 .ev{border-left:5px solid var(--c,var(--t-otro))}
 .ev .when{flex:none;text-align:center;min-width:52px;font-variant-numeric:tabular-nums}
@@ -235,40 +232,61 @@ function relLabel(s){
 $("#today").textContent = fmtLong(isoToday()).replace(/^./,c=>c.toUpperCase());
 
 /* ---------- almacenamiento: base de datos privada de Claude, o el navegador ---------- */
-let items = [];             // {id, kind:"task"|"event", ...}
-let store = null;           // {put(item), remove(id)}
-const LS_KEY = "agenda-horacio-v1";
-function lsRead(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); }catch{ return []; } }
-function lsWrite(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(items)); }catch{} }
+const LS_KEY = "agenda-horacio-v1", LS_DEL = "agenda-horacio-borrados";
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)||"[]"); }catch{ return []; } }
+function lsSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const setStatus = t => { $("#status").textContent = t; };
 
-function useLocal(msg){
-  items = lsRead();
-  store = {
-    put(it){ const i=items.findIndex(x=>x.id===it.id); if(i>=0) items[i]=it; else items.push(it); lsWrite(); render(); return Promise.resolve(); },
-    remove(id){ items=items.filter(x=>x.id!==id); lsWrite(); render(); return Promise.resolve(); }
-  };
-  $("#status").textContent = msg;
-  render();
+/* Siempre se guarda en el teléfono. Si la app está abierta dentro de Claude, además se copia a tu cuenta. */
+let items = lsGet(LS_KEY);       // {id, kind:"task"|"event", updatedAt, ...}
+let deleted = lsGet(LS_DEL);
+let col = null, dirty = new Set(), flushing = false, fTimer = null;
+const store = {
+  put(it){ it = {...it, updatedAt: Date.now()};
+    const i = items.findIndex(x=>x.id===it.id); if(i>=0) items[i]=it; else items.push(it);
+    lsSet(LS_KEY, items); dirty.add(it.id); schedule(); render(); },
+  remove(id){ items = items.filter(x=>x.id!==id); lsSet(LS_KEY, items);
+    if(col && !deleted.includes(id)){ deleted.push(id); lsSet(LS_DEL, deleted); }
+    dirty.delete(id); schedule(); render(); }
+};
+function schedule(){ if(!col) return; clearTimeout(fTimer); fTimer = setTimeout(flush, 600); }
+async function flush(){
+  if(!col || flushing) return; flushing = true;
+  try{
+    for(const id of [...deleted]){ await col.doc(id).delete(); deleted = deleted.filter(x=>x!==id); lsSet(LS_DEL, deleted); }
+    for(const id of [...dirty]){ dirty.delete(id); const it = items.find(x=>x.id===id);
+      if(it){ const {id:_, ...body} = it; await col.doc(id).set(JSON.parse(JSON.stringify(body))); } }
+    setStatus("Guardado en el teléfono y en tu cuenta.");
+  }catch{ setStatus("Guardado en este teléfono."); }
+  flushing = false; if(dirty.size || deleted.length) fTimer = setTimeout(flush, 3000);
 }
+addEventListener("online", ()=>flush());
 
 async function init(){
+  setStatus("Guardado en este teléfono.");
   render();
-  $("#status").textContent = "Conectando…";
-  let db=null, user=null;
-  try{ [db,user] = await Promise.all([window.claude?.use?.("db"), window.claude?.use?.("user")]); }catch{}
-  const me = user ? await user.id().catch(()=>null) : null;
-  if(!db || !me){ useLocal("Guardado en este navegador (sin cuenta conectada)."); return; }
-  const col = db.collection("data/users/"+me);
-  store = {
-    put(it){ const {id,...body}=it; return col.doc(id).set(body).catch(e=>{toast("No se pudo guardar: "+(e?.message||"error"));}); },
-    remove(id){ return col.doc(id).delete().catch(e=>{toast("No se pudo borrar: "+(e?.message||"error"));}); }
-  };
-  col.onSnapshot(snap=>{
-    items = snap.docs.map(d=>({id:d.id, ...d.data()}));
-    $("#status").textContent = "Guardado en tu cuenta. Solo vos ves estos datos.";
-    render();
-  }, ()=>{ useLocal("Sin conexión con tu cuenta: guardando en este navegador."); });
+  for(let i=0; i<30 && !window.claude?.use; i++) await new Promise(r=>setTimeout(r,100));
+  if(!window.claude?.use) return;
+  try{
+    const [d,u] = await Promise.all([claude.use("db"), claude.use("user")]);
+    if(!d || !u) return;
+    const me = await u.id(); if(!me) return;
+    col = d.collection("data/users/"+me);
+    const snap = await col.get();
+    const remote = new Map(snap.docs.map(x=>[x.id, x.data()]));
+    let changed = false;
+    for(const [id,r] of remote){
+      if(!r || deleted.includes(id)) continue;
+      const i = items.findIndex(x=>x.id===id);
+      if(i<0){ items.push({id, ...r}); changed = true; }
+      else if((r.updatedAt||0) > (items[i].updatedAt||0)){ items[i] = {id, ...r}; changed = true; }
+    }
+    for(const it of items){ const r = remote.get(it.id); if(!r || (it.updatedAt||0) > (r.updatedAt||0)) dirty.add(it.id); }
+    if(changed){ lsSet(LS_KEY, items); render(); }
+    setStatus("Guardado en el teléfono y en tu cuenta.");
+    flush();
+  }catch{ setStatus("Guardado en este teléfono."); }
 }
 
 /* ---------- estado de la interfaz ---------- */
@@ -378,7 +396,7 @@ function renderEvents(evs){
   if(ui.eview==="type"){
     TYPES.forEach(t=>{ const g=list.filter(e=>e.type===t.id); if(g.length) groups.set(`<span class="dot" style="--c:var(${t.c})"></span>${t.name}`, g); });
   } else {
-    list.forEach(e=>{ const k=parseISO(e.date).toLocaleDateString("es-AR",{month:"long",year:"numeric"}); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(e); });
+    list.forEach(e=>{ const k=parseISO(e.date).toLocaleDateString("es-AR",{month:"long",year:"numeric"}).replace(/^./,c=>c.toUpperCase()); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(e); });
   }
   box.innerHTML = [...groups].map(([k,g])=>`<div class="group"><h3>${k} <span class="count">${g.length}</span></h3><ul class="list">${g.map(card).join("")}</ul></div>`).join("");
 }
@@ -466,6 +484,5 @@ function stopMic(){ if(rec){ try{rec.stop();}catch{} } }
 /* ---------- arranque ---------- */
 resetTaskForm(); resetEvForm(); route(); init();
 </script>
-
-</body>
-</html>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{})</script>
+</body></html>

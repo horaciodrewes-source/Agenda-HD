@@ -20,8 +20,14 @@ Agenda personal de tareas y eventos, en una sola página web (HTML y JavaScript,
 
 ## Cómo usarla
 
-- **Versión en Claude:** https://claude.ai/artifact/2ydTsJW2suruP3Auxzo1v4. Los datos se guardan en tu cuenta de Claude y se ven desde cualquier dispositivo.
-- **Abriendo `index.html` en el navegador** (o publicándola con GitHub Pages): los datos se guardan en ese navegador solamente.
+- **En el celular (como la app de Golf):** abrí https://horaciodrewes-source.github.io/agenda-hd/ y elegí "Agregar a pantalla de inicio" (Android: menú ⋮ de Chrome; iPhone: botón Compartir de Safari). Queda como una app con su ícono y funciona sin internet. Los datos se guardan en el teléfono.
+- **Dentro de Claude:** https://claude.ai/artifact/2ydTsJW2suruP3Auxzo1v4. Ahí los datos se guardan en el navegador y además en tu cuenta de Claude.
+
+## Archivos
+
+- `agenda.html`: la app (es la misma página que se publica en Claude).
+- `index.html`: la versión instalable para el celular. Se arma con `./build.sh` a partir de `agenda.html`; no editarla a mano.
+- `manifest.webmanifest`, `sw.js` e íconos: lo que hace que se pueda instalar y funcione sin conexión.
 
 ## Dictado por voz
 

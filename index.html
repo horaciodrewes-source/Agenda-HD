@@ -117,6 +117,11 @@ ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;ga
 .cats button{min-height:56px;padding:8px 6px;font-size:.9rem;line-height:1.15;font-weight:600;color:var(--muted);background:var(--bg)}
 .cats button[aria-checked="true"]{background:var(--c);border-color:var(--c);color:var(--accent-ink);font-weight:700}
 .cats .c-fecha{--c:var(--t-reunion)} .cats .c-urgente{--c:var(--danger)} .cats .c-recordatorio{--c:var(--accent)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px}
+.modes button{border:0;border-radius:999px;min-height:46px;background:transparent;color:var(--muted);font:700 1.2rem/1 var(--display);text-transform:uppercase;letter-spacing:.03em}
+.modes button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+#ev-chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#ev-chips .chip{justify-content:center;text-align:center;padding:6px 6px;min-height:46px;font-size:.85rem;line-height:1.15}
 .menu{display:flex;flex-direction:column;gap:8px}
 .menu a{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:var(--r);text-decoration:none;color:var(--ink)}
 .menu a:active{background:var(--accent-soft)}
@@ -146,8 +151,12 @@ a.back{display:inline-flex;align-items:center;min-height:44px;padding:6px 14px 6
 
   <!-- ===== INICIO: nueva tarea + menú de listados ===== -->
   <section id="view-inicio" class="wrap" style="padding:0;gap:14px">
+    <div class="modes" role="tablist" aria-label="Qué querés cargar">
+      <button type="button" role="tab" data-mode="tarea">Nueva tarea</button>
+      <button type="button" role="tab" data-mode="evento">Nuevo evento</button>
+    </div>
     <form class="card" id="f-task" autocomplete="off">
-      <h2 id="f-task-title">Nueva tarea</h2>
+      <h2 id="f-task-title" hidden>Editar tarea</h2>
       <div class="textbox">
         <textarea id="task-text" placeholder="Escribí la tarea o tocá el micrófono para dictarla" required></textarea>
         <button type="button" class="mic" data-target="task-text" aria-label="Dictar por voz" title="Dictar por voz"></button>
@@ -164,33 +173,8 @@ a.back{display:inline-flex;align-items:center;min-height:44px;padding:6px 14px 6
         <button type="button" class="ghost" id="task-cancel" hidden>Cancelar edición</button>
       </div>
     </form>
-    <h2>Listados</h2>
-    <nav class="menu" id="menu" aria-label="Listados"></nav>
-  </section>
-
-  <!-- ===== UN LISTADO DE TAREAS ===== -->
-  <section id="view-lista" class="wrap" style="padding:0;gap:14px" hidden>
-    <div class="listhead">
-      <a href="#inicio" class="back">← Volver</a>
-      <h2 id="lista-title"></h2>
-    </div>
-    <div class="toolbar">
-      <label style="flex-direction:row;align-items:center;gap:8px" for="task-sort">Ordenar
-        <select id="task-sort"></select>
-      </label>
-    </div>
-    <ul class="list" id="task-list"></ul>
-    <div id="clear-done-box"></div>
-  </section>
-
-  <!-- ===== EVENTOS ===== -->
-  <section id="view-eventos" class="wrap" style="padding:0;gap:14px" hidden>
-    <div class="listhead">
-      <a href="#inicio" class="back">← Volver</a>
-      <h2>Eventos</h2>
-    </div>
-    <form class="card" id="f-ev" autocomplete="off">
-      <h2 id="f-ev-title">Nuevo evento</h2>
+    <form class="card" id="f-ev" autocomplete="off" hidden>
+      <h2 id="f-ev-title" hidden>Editar evento</h2>
       <div class="textbox">
         <textarea id="ev-text" placeholder="Descripción del evento (podés dictarla)" required></textarea>
         <button type="button" class="mic" data-target="ev-text" aria-label="Dictar por voz" title="Dictar por voz"></button>
@@ -219,6 +203,31 @@ a.back{display:inline-flex;align-items:center;min-height:44px;padding:6px 14px 6
         <button type="button" class="ghost" id="ev-cancel" hidden>Cancelar edición</button>
       </div>
     </form>
+    <h2>Listados</h2>
+    <nav class="menu" id="menu" aria-label="Listados"></nav>
+  </section>
+
+  <!-- ===== UN LISTADO DE TAREAS ===== -->
+  <section id="view-lista" class="wrap" style="padding:0;gap:14px" hidden>
+    <div class="listhead">
+      <a href="#inicio" class="back">← Volver</a>
+      <h2 id="lista-title"></h2>
+    </div>
+    <div class="toolbar">
+      <label style="flex-direction:row;align-items:center;gap:8px" for="task-sort">Ordenar
+        <select id="task-sort"></select>
+      </label>
+    </div>
+    <ul class="list" id="task-list"></ul>
+    <div id="clear-done-box"></div>
+  </section>
+
+  <!-- ===== EVENTOS ===== -->
+  <section id="view-eventos" class="wrap" style="padding:0;gap:14px" hidden>
+    <div class="listhead">
+      <a href="#inicio" class="back">← Volver</a>
+      <h2>Eventos</h2>
+    </div>
 
     <div class="toolbar">
       <div class="seg" role="group" aria-label="Vista">
@@ -336,7 +345,7 @@ async function init(){
 const ui = (()=>{ let s={}; try{ s=JSON.parse(localStorage.getItem("agenda-ui")||"{}"); }catch{}
   return Object.assign({sorts:{}, eview:"time", eperiod:"next", etypes:[]}, s); })();
 const saveUI = () => { try{ localStorage.setItem("agenda-ui", JSON.stringify(ui)); }catch{} };
-let editTask=null, editEv=null, confirmClear=false, confirmDel=null, taskCat="recordatorio";
+let formMode="tarea", editTask=null, editEv=null, confirmClear=false, confirmDel=null, taskCat="recordatorio";
 
 /* ---------- listados y navegación ---------- */
 const CATS = {
@@ -369,7 +378,7 @@ function esc(s){ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&
 function render(){
   const tasks = items.filter(i=>i.kind==="task");
   const evs = items.filter(i=>i.kind==="event");
-  renderMenu(tasks, evs); renderTasks(tasks); renderEvents(evs); renderPeople(); renderCats();
+  renderMenu(tasks, evs); renderTasks(tasks); renderEvents(evs); renderPeople(); renderCats(); renderMode();
 }
 
 function renderMenu(tasks, evs){
@@ -434,6 +443,11 @@ function renderTasks(tasks){
     : `<button class="danger" id="clear-done">Borrar las realizadas (${nDone})</button>`;
 }
 
+function renderMode(){
+  $$("[data-mode]").forEach(b=>b.setAttribute("aria-selected", b.dataset.mode===formMode));
+  $("#f-task").hidden = formMode!=="tarea";
+  $("#f-ev").hidden = formMode!=="evento";
+}
 function renderCats(){
   $$("[data-cat]").forEach(b=>b.setAttribute("aria-checked", b.dataset.cat===taskCat));
   $("#task-date-box").hidden = taskCat!=="fecha";
@@ -453,7 +467,7 @@ function renderEvents(evs){
   list.sort((a,b)=> ui.eperiod==="past" ? key(b).localeCompare(key(a)) : key(a).localeCompare(key(b)));
   const box = $("#ev-list");
   if(!list.length){
-    box.innerHTML = `<div class="empty"><strong>${evs.length?"No hay eventos con este filtro":"Todavía no hay eventos"}</strong>${evs.length?"Probá con otro tipo o período.":"Cargá la descripción, la fecha, la ubicación y el tipo arriba."}</div>`;
+    box.innerHTML = `<div class="empty"><strong>${evs.length?"No hay eventos con este filtro":"Todavía no hay eventos"}</strong>${evs.length?"Probá con otro tipo o período.":"Cargalos desde la pantalla principal, con “Nuevo evento”."}</div>`;
     return;
   }
   const card = e => { const t=typeOf(e.type); const d=parseISO(e.date); const rel=relLabel(e.date);
@@ -497,7 +511,7 @@ $("#f-task").addEventListener("submit", e=>{
   resetTaskForm();
 });
 function resetTaskForm(){ editTask=null; $("#f-task").reset(); $("#task-date").value=""; taskCat="recordatorio"; renderCats(); dictated.delete("task-text");
-  $("#f-task-title").textContent="Nueva tarea"; $("#task-submit").textContent="Guardar tarea"; $("#task-cancel").hidden=true; }
+  $("#f-task-title").hidden=true; $("#task-submit").textContent="Guardar tarea"; $("#task-cancel").hidden=true; }
 $("#task-cancel").onclick = resetTaskForm;
 
 $("#f-ev").addEventListener("submit", e=>{
@@ -508,7 +522,7 @@ $("#f-ev").addEventListener("submit", e=>{
   toast(editEv?"Evento actualizado":"Evento guardado"); resetEvForm();
 });
 function resetEvForm(){ editEv=null; $("#f-ev").reset(); $("#ev-date").value=isoToday(); picked=[]; renderPeople();
-  $("#f-ev-title").textContent="Nuevo evento"; $("#ev-submit").textContent="Guardar evento"; $("#ev-cancel").hidden=true; }
+  $("#f-ev-title").hidden=true; $("#ev-submit").textContent="Guardar evento"; $("#ev-cancel").hidden=true; }
 $("#ev-cancel").onclick = resetEvForm;
 $("#ev-type").innerHTML = TYPES.map(t=>`<option value="${t.id}">${t.name}</option>`).join("");
 
@@ -555,6 +569,7 @@ document.addEventListener("click", e=>{
   const b = e.target.closest("button,input[data-toggle]"); if(!b) return;
   const d = b.dataset;
   if(d.unperson!==undefined){ picked = picked.filter(n=>n!==d.unperson); renderPeople(); }
+  else if(d.mode){ stopMic(); formMode=d.mode; renderMode(); }
   else if(d.cat){ taskCat=d.cat; if(taskCat==="fecha" && !$("#task-date").value) $("#task-date").value=isoToday(); renderCats(); }
   else if(d.eview){ ui.eview=d.eview; saveUI(); render(); }
   else if(d.eperiod){ ui.eperiod=d.eperiod; saveUI(); render(); }
@@ -566,12 +581,13 @@ document.addEventListener("click", e=>{
   else if(d.editTask){ const t=items.find(i=>i.id===d.editTask); editTask=t.id;
     if(location.hash!=="#inicio") location.hash="inicio";
     $("#task-text").value=t.text; $("#task-date").value=t.date||""; taskCat=catOf(t); renderCats();
-    $("#f-task-title").textContent="Editar tarea"; $("#task-submit").textContent="Guardar cambios"; $("#task-cancel").hidden=false;
+    formMode="tarea"; renderMode(); $("#f-task-title").hidden=false; $("#task-submit").textContent="Guardar cambios"; $("#task-cancel").hidden=false;
     setTimeout(()=>{ $("#f-task").scrollIntoView({behavior:"smooth"}); $("#task-text").focus(); }, 50); }
   else if(d.editEv){ const t=items.find(i=>i.id===d.editEv); editEv=t.id;
+    if(location.hash!=="#inicio") location.hash="inicio"; formMode="evento"; renderMode();
     $("#ev-text").value=t.text; $("#ev-date").value=t.date; $("#ev-time").value=t.time||""; $("#ev-place").value=t.place||""; $("#ev-type").value=t.type; picked=[...(t.people||[])]; renderPeople();
-    $("#f-ev-title").textContent="Editar evento"; $("#ev-submit").textContent="Guardar cambios"; $("#ev-cancel").hidden=false;
-    $("#f-ev").scrollIntoView({behavior:"smooth"}); $("#ev-text").focus(); }
+    $("#f-ev-title").hidden=false; $("#ev-submit").textContent="Guardar cambios"; $("#ev-cancel").hidden=false;
+    setTimeout(()=>{ $("#f-ev").scrollIntoView({behavior:"smooth"}); $("#ev-text").focus(); }, 50); }
   else if(b.id==="clear-done"){ confirmClear=true; render(); }
   else if(b.id==="clear-no"){ confirmClear=false; render(); }
   else if(b.id==="clear-yes"){ confirmClear=false; const done=items.filter(i=>i.kind==="task"&&i.done); done.forEach(t=>store.remove(t.id)); toast(`${done.length} tareas borradas`); }

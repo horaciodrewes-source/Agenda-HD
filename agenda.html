@@ -1,7 +1,5 @@
 <title>Agenda de Horacio</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
 /* Layout: una columna para el celular, encabezado fijo, pestañas grandes, formulario arriba de cada lista. Mismo estilo que la Tarjeta de Golf. */
 /* Tono blanco por defecto (se lee mejor). El botón del encabezado pasa a fondo negro, que en pantallas OLED gasta menos batería. */
@@ -10,8 +8,9 @@
   --accent:#1f7a47; --accent-ink:#ffffff; --accent-soft:#dff0e6; --flag:#b8860b;
   --ok:#1f7a47; --danger:#b3352b; --danger-soft:#fbe9e7;
   --t-reunion:#2a5bb8; --t-medico:#b3352b; --t-cumple:#a8186f; --t-trabajo:#8a6100; --t-viaje:#00796b; --t-social:#6b3fb0; --t-discusion:#c2410c; --t-otro:#5d6a62;
-  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
-  --body:"Source Sans 3",-apple-system,system-ui,sans-serif;
+  /* La letra del sistema: en el iPhone es la misma del Mail (San Francisco). */
+  --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;
   --r:10px;
   color-scheme:light;
 }
@@ -23,7 +22,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.45}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.35;-webkit-font-smoothing:antialiased}
 .wrap{max-width:560px;margin:0 auto;padding-block:0 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
 .wrap .wrap{margin:0;width:100%}
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
@@ -35,14 +34,14 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var
 .newp{display:flex;gap:8px}
 .newp input{flex:1}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
-h1{font:700 1.75rem/1 var(--display);margin:0;letter-spacing:.02em;text-transform:uppercase}
+h1{font:700 1.75rem/1 var(--display);margin:0}
 .today{color:var(--muted);font-size:.95rem}
 .tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px}
-.tabs a{flex:1;text-align:center;padding:10px 12px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:700;font-family:var(--display);font-size:1.25rem;text-transform:uppercase;letter-spacing:.03em}
+.tabs a{flex:1;text-align:center;padding:10px 12px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:700;font-family:var(--display);font-size:1.25rem}
 .tabs a[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
 .tabs .n{font-family:var(--body);font-weight:400;font-size:.85rem;opacity:.85;margin-left:4px}
 form.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
-h2{font:700 1.35rem/1.1 var(--display);margin:0;text-transform:uppercase;letter-spacing:.02em}
+h2{font:700 1.3rem/1.15 var(--display);margin:0}
 label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);font-weight:700;letter-spacing:.02em;min-width:0}
 input,textarea,select{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
 textarea{resize:vertical;min-height:84px}
@@ -105,7 +104,7 @@ ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;ga
 .cats button[aria-checked="true"]{background:var(--c);border-color:var(--c);color:var(--accent-ink);font-weight:700}
 .cats .c-fecha{--c:var(--t-reunion)} .cats .c-urgente{--c:var(--danger)} .cats .c-recordatorio{--c:var(--accent)}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px}
-.modes button{border:0;border-radius:999px;min-height:46px;background:transparent;color:var(--muted);font:700 1.2rem/1 var(--display);text-transform:uppercase;letter-spacing:.03em}
+.modes button{border:0;border-radius:999px;min-height:46px;background:transparent;color:var(--muted);font:600 1.05rem/1 var(--display)}
 .modes button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 #ev-chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 #ev-chips .chip{justify-content:center;text-align:center;padding:6px 6px;min-height:46px;font-size:.85rem;line-height:1.15}
@@ -113,7 +112,7 @@ ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;ga
 .menu a{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:var(--r);text-decoration:none;color:var(--ink)}
 .menu a:active{background:var(--accent-soft)}
 .menu .mt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.menu .mt b{font:700 1.3rem/1.1 var(--display);text-transform:uppercase;letter-spacing:.02em}
+.menu .mt b{font:700 1.15rem/1.2 var(--display)}
 .menu .mt span{font-size:.88rem;color:var(--muted)}
 .menu .mt span .late{color:var(--danger);font-weight:700}
 .menu .num{font:700 2rem/1 var(--display);color:var(--c);font-variant-numeric:tabular-nums;min-width:1.5ch;text-align:right}
@@ -125,7 +124,7 @@ a.back{display:inline-flex;align-items:center;min-height:44px;padding:6px 14px 6
 .topbar{flex-direction:row!important;align-items:center;gap:10px;min-height:52px}
 .topbar #nav-left{flex:1;min-width:0;display:flex}
 a.go{flex:1;display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 14px;border-radius:12px;background:var(--accent);color:var(--accent-ink);text-decoration:none}
-a.go b{font:700 1.3rem/1 var(--display);text-transform:uppercase;letter-spacing:.03em}
+a.go b{font:700 1.15rem/1.1 var(--display)}
 a.go .gt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 a.go .badge{font-size:.85rem;font-weight:600;opacity:.95}
 a.go .badge:empty{display:none}
@@ -135,12 +134,12 @@ a.go .arrow{font-size:1.5rem;line-height:1}
 ul.notes{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .note{border-bottom:1px solid var(--line)}
 .note .row{display:flex;align-items:flex-start;gap:4px}
-.note .tick{min-height:0;width:36px;height:36px;padding:0;border:0;background:none;display:grid;place-items:center;flex:none;color:var(--muted)}
+.note .tick{min-height:0;width:34px;height:34px;padding:0;border:0;background:none;display:grid;place-items:center;flex:none;color:var(--muted)}
 .note .tick span{width:18px;height:18px;border:2px solid currentColor;border-radius:50%;display:block}
 .note.done .tick span{background:var(--ok);border-color:var(--ok)}
-.note .ntext{flex:1;min-width:0;min-height:0;text-align:left;border:0;background:none;padding:8px 4px 8px 0;font-weight:400;display:flex;gap:8px;align-items:baseline}
-.note .t{flex:1;min-width:0;font-size:.9rem;line-height:1.3;white-space:pre-wrap;overflow-wrap:anywhere}
-.note .nd{flex:none;font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.note .ntext{flex:1;min-width:0;min-height:0;text-align:left;border:0;background:none;padding:7px 2px 7px 0;font-weight:400;display:flex;gap:8px;align-items:baseline}
+.note .t{flex:1;min-width:0;font-size:17px;line-height:1.3;white-space:pre-wrap;overflow-wrap:anywhere}
+.note .nd{flex:none;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .note.done .t{text-decoration:line-through;color:var(--muted)}
 .note.pinned .t{font-weight:700}
 .note .pin{color:var(--flag);font-size:.75rem;margin-right:4px}

@@ -34,6 +34,10 @@ El botón de las flechas (arriba) abre "Celular y PC". Ahí se cargan tres datos
 
 El permiso y la clave quedan guardados solo en cada aparato y nunca se suben a ningún repositorio. Los cambios se sincronizan solos al guardar, al volver a abrir la app y cada dos minutos.
 
+### Entrar solo con la clave
+
+Desde un aparato ya conectado, "Generar código de acceso" crea un código con el repositorio y el permiso cifrados con la clave (PBKDF2 de 600.000 vueltas + AES-GCM). Ese código se publica como `acceso.json` junto a la app. En un aparato nuevo, la app lo encuentra y pide solo la clave para destrabarlo.
+
 ## Archivos
 
 - `agenda.html`: la app (es la misma página que se publica en Claude).

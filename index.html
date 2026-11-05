@@ -307,9 +307,12 @@ ul.notes{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
     <form class="card" id="f-sync" autocomplete="off">
       <p>Tus notas, tareas y eventos se guardan cifrados en tu repositorio privado de GitHub. Cargá los mismos datos en el celular y en la PC, y los dos aparatos ven lo mismo.</p>
       <p class="syncstate" id="sync-state"></p>
+      <div id="sync-manual" style="display:flex;flex-direction:column;gap:12px">
       <label for="sync-repo">Repositorio de datos<input type="text" id="sync-repo" value="horaciodrewes-source/Agenda-HD-datos" autocapitalize="off" spellcheck="false"></label>
       <label for="sync-token">Permiso de GitHub (empieza con github_pat_)
         <span class="pw"><input type="password" id="sync-token" autocapitalize="off" spellcheck="false" placeholder="github_pat_…"><button type="button" class="ghost" data-show="sync-token">Ver</button></span></label>
+      </div>
+      <p id="sync-quick" hidden>Para entrar en este aparato alcanza con tu clave. <button type="button" class="ghost" id="sync-show-manual" style="min-height:0;padding:2px 4px;text-decoration:underline">Cargar el permiso a mano</button></p>
       <label for="sync-pass">Clave para cifrar
         <span class="pw"><input type="password" id="sync-pass" autocapitalize="off" spellcheck="false"><button type="button" class="ghost" data-show="sync-pass">Ver</button></span></label>
       <p>Usá la misma clave en todos tus aparatos. Si la olvidás, lo guardado en GitHub no se puede abrir (lo de cada aparato no se pierde).</p>
@@ -317,6 +320,13 @@ ul.notes{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
         <button class="primary" type="submit" id="sync-connect">Conectar y sincronizar</button>
         <button type="button" id="sync-now" hidden>Sincronizar ahora</button>
         <button type="button" class="danger" id="sync-off" hidden>Desconectar este aparato</button>
+      </div>
+      <div id="access-box" style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:12px" hidden>
+        <h2 style="font-size:1.05rem">Entrar en otros aparatos solo con la clave</h2>
+        <p>Generá un código de acceso y mandámelo por el chat. Está cifrado con tu clave, así que sin ella no sirve. Cuando lo suba, en un aparato nuevo alcanza con poner la clave.</p>
+        <button type="button" id="access-make" style="align-self:flex-start">Generar código de acceso</button>
+        <textarea id="access-code" readonly hidden style="font-size:.75rem;min-height:110px;font-family:ui-monospace,Menlo,monospace"></textarea>
+        <button type="button" class="primary" id="access-copy" style="align-self:flex-start" hidden>Copiar código</button>
       </div>
     </form>
   </section>
@@ -808,9 +818,44 @@ function renderSync(){
   if(gh && document.activeElement?.closest?.("#f-sync")==null){ $("#sync-repo").value=gh.repo; $("#sync-token").value=gh.token; $("#sync-pass").value=gh.pass; }
   $("#sync-connect").textContent = gh ? "Guardar cambios" : "Conectar y sincronizar";
   $("#sync-now").hidden = !gh; $("#sync-off").hidden = !gh;
+  const quick = !gh && accessBlob && !manualMode;
+  $("#sync-manual").hidden = quick; $("#sync-quick").hidden = !quick;
+  if(quick) $("#sync-connect").textContent = "Entrar con la clave";
+  $("#access-box").hidden = !gh;
 }
-$("#f-sync").addEventListener("submit", e=>{
+/* Código de acceso: repositorio y permiso cifrados con la clave, publicado junto a la app (acceso.json). */
+let accessBlob=null, manualMode=false;
+async function sealWith(pass, obj){
+  const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+  const base=await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  const key=await crypto.subtle.deriveKey({name:"PBKDF2", salt, iterations:600000, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["encrypt"]);
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, new TextEncoder().encode(JSON.stringify(obj)));
+  return {app:"Agenda HD acceso", v:1, it:600000, salt:toB64(salt), iv:toB64(iv), data:toB64(ct)};
+}
+async function openWith(pass, b){
+  const base=await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  const key=await crypto.subtle.deriveKey({name:"PBKDF2", salt:fromB64(b.salt), iterations:b.it||600000, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["decrypt"]);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv:fromB64(b.iv)}, key, fromB64(b.data))));
+}
+fetch("acceso.json", {cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.data){ accessBlob=j; if(view==="sync") renderSync(); } }).catch(()=>{});
+$("#sync-show-manual").addEventListener("click", ()=>{ manualMode=true; renderSync(); });
+$("#access-make").addEventListener("click", async ()=>{
+  if(!gh) return; $("#access-make").disabled=true; $("#access-make").textContent="Generando…";
+  try{ const b=await sealWith(gh.pass, {repo:gh.repo, token:gh.token}); $("#access-code").value=JSON.stringify(b); $("#access-code").hidden=false; $("#access-copy").hidden=false; }
+  catch{ toast("No se pudo generar el código."); }
+  $("#access-make").disabled=false; $("#access-make").textContent="Generar código de acceso";
+});
+$("#access-copy").addEventListener("click", ()=>{ const t=$("#access-code");
+  navigator.clipboard.writeText(t.value).then(()=>toast("Código copiado"), ()=>{ t.select(); toast("Seleccionado: copialo con el menú"); }); });
+$("#f-sync").addEventListener("submit", async e=>{
   e.preventDefault();
+  if(!gh && accessBlob && !manualMode){
+    const pass=$("#sync-pass").value; if(!pass){ renderSyncMsg("Escribí tu clave."); return; }
+    $("#sync-connect").disabled=true; renderSyncMsg("Abriendo…"); $("#sync-state").className="syncstate";
+    try{ const a=await openWith(pass, accessBlob); $("#sync-repo").value=a.repo; $("#sync-token").value=a.token; }
+    catch{ $("#sync-connect").disabled=false; renderSyncMsg("La clave no es correcta."); return; }
+    $("#sync-connect").disabled=false;
+  }
   const repo=$("#sync-repo").value.trim().replace(/^https?:\/\/github\.com\//,"").replace(/\/$/,""), token=$("#sync-token").value.trim(), pass=$("#sync-pass").value;
   if(!/^[\w.-]+\/[\w.-]+$/.test(repo)){ ghErr="El repositorio tiene que ser usuario/nombre, por ejemplo horaciodrewes-source/Agenda-HD-datos."; renderSyncMsg(ghErr); ghErr=""; return; }
   if(!token){ renderSyncMsg("Falta el permiso de GitHub."); return; }

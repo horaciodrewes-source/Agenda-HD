@@ -24,6 +24,16 @@ Agenda personal de tareas y eventos, en una sola página web (HTML y JavaScript,
 - **En el celular (como la app de Golf):** abrí https://horaciodrewes-source.github.io/Agenda-HD/ y elegí "Agregar a pantalla de inicio" (Android: menú ⋮ de Chrome; iPhone: botón Compartir de Safari). Queda como una app con su ícono y funciona sin internet. Los datos se guardan en el teléfono.
 - **Dentro de Claude:** https://claude.ai/artifact/2ydTsJW2suruP3Auxzo1v4. Ahí los datos se guardan en el navegador y además en tu cuenta de Claude.
 
+## Celular y PC con los mismos datos
+
+El botón de las flechas (arriba) abre "Celular y PC". Ahí se cargan tres datos, iguales en cada aparato:
+
+- **Repositorio de datos:** un repositorio **privado** aparte, por ejemplo `horaciodrewes-source/Agenda-HD-datos`.
+- **Permiso de GitHub:** un token *fine-grained* con acceso solo a ese repositorio y permiso **Contents: Read and write**.
+- **Clave:** la inventa el usuario. Todo se cifra en el aparato (AES-GCM, con la clave pasada por PBKDF2) antes de subirse, así que en GitHub queda un solo archivo, `agenda.cifrada.json`, que sin la clave no se puede leer.
+
+El permiso y la clave quedan guardados solo en cada aparato y nunca se suben a ningún repositorio. Los cambios se sincronizan solos al guardar, al volver a abrir la app y cada dos minutos.
+
 ## Archivos
 
 - `agenda.html`: la app (es la misma página que se publica en Claude).

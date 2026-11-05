@@ -4,18 +4,19 @@ Agenda personal de tareas y eventos, en una sola página web (HTML y JavaScript,
 
 ## Qué hace
 
-**Tareas**
-- Se escriben o se dictan por voz (el micrófono pasa la voz a texto).
-- Cada tarea lleva fecha y prioridad opcional.
-- Se ordenan por fecha, prioridad, recién agregadas o en orden alfabético.
-- Se marcan como realizadas y se pueden borrar todas las realizadas juntas.
+**Notas rápidas** (primera pantalla)
+- Se escriben o se dictan, sin fecha ni prioridad. Cada una guarda el día en que se anotó.
+- Lista en letra chica, la más nueva arriba, con buscador y notas fijadas arriba.
+- Se tachan y pasan a Terminadas. Una nota se puede pasar a tarea o a evento.
+
+**Tareas** (con fecha o urgentes sin fecha)
+- Listados de urgentes, con fecha programada y realizadas, cada uno con su cantidad.
 - Las vencidas se marcan en rojo.
 
 **Eventos**
 - Descripción (escrita o dictada), fecha, hora, ubicación y tipo de evento.
-- Tipos: reunión, trabajo / cliente, médico / salud, cumpleaños, viaje, social / familia y otro.
-- Vista en línea de tiempo (agrupada por mes) o agrupada por tipo.
-- Filtros por tipo y por próximos, pasados o todos.
+- Tipos: reunión, trabajo / cliente, médico / salud, cumpleaños, viaje, social / familia, discusión (con personas involucradas) y otro.
+- Vista en línea de tiempo (agrupada por mes) o agrupada por tipo, con filtros por tipo y por próximos, pasados o todos.
 - La ubicación abre en Google Maps.
 
 ## Cómo usarla

@@ -100,7 +100,7 @@ ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;ga
 .empty{text-align:center;color:var(--muted);padding:28px 16px;border:1px dashed var(--line);border-radius:var(--r)}
 .empty strong{display:block;color:var(--ink);font-family:var(--display);font-size:1.1rem;margin-bottom:4px}
 .confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--danger-soft);border-radius:8px;padding:8px 10px}
-.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cats{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
 .cats button{min-height:56px;padding:8px 6px;font-size:.9rem;line-height:1.15;font-weight:600;color:var(--muted);background:var(--bg)}
 .cats button[aria-checked="true"]{background:var(--c);border-color:var(--c);color:var(--accent-ink);font-weight:700}
 .cats .c-fecha{--c:var(--t-reunion)} .cats .c-urgente{--c:var(--danger)} .cats .c-recordatorio{--c:var(--accent)}
@@ -122,19 +122,65 @@ ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;ga
 .listhead h2{flex:1;min-width:0}
 a.back{display:inline-flex;align-items:center;min-height:44px;padding:6px 14px 6px 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-weight:700;background:var(--surface)}
 .cat-tag{font-weight:700;color:var(--c)}
+.topbar{flex-direction:row!important;align-items:center;gap:10px;min-height:52px}
+.topbar #nav-left{flex:1;min-width:0;display:flex}
+a.go{flex:1;display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 14px;border-radius:12px;background:var(--accent);color:var(--accent-ink);text-decoration:none}
+a.go b{font:700 1.3rem/1 var(--display);text-transform:uppercase;letter-spacing:.03em}
+a.go .gt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+a.go .badge{font-size:.85rem;font-weight:600;opacity:.95}
+a.go .badge:empty{display:none}
+a.go .arrow{font-size:1.5rem;line-height:1}
+#f-note textarea{min-height:64px}
+#note-q{padding:8px 12px;font-size:.95rem}
+ul.notes{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.note{border-bottom:1px solid var(--line)}
+.note .row{display:flex;align-items:flex-start;gap:4px}
+.note .tick{min-height:0;width:36px;height:36px;padding:0;border:0;background:none;display:grid;place-items:center;flex:none;color:var(--muted)}
+.note .tick span{width:18px;height:18px;border:2px solid currentColor;border-radius:50%;display:block}
+.note.done .tick span{background:var(--ok);border-color:var(--ok)}
+.note .ntext{flex:1;min-width:0;min-height:0;text-align:left;border:0;background:none;padding:8px 4px 8px 0;font-weight:400;display:flex;gap:8px;align-items:baseline}
+.note .t{flex:1;min-width:0;font-size:.9rem;line-height:1.3;white-space:pre-wrap;overflow-wrap:anywhere}
+.note .nd{flex:none;font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.note.done .t{text-decoration:line-through;color:var(--muted)}
+.note.pinned .t{font-weight:700}
+.note .pin{color:var(--flag);font-size:.75rem;margin-right:4px}
+.note .acts{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 10px 40px}
+.note .acts button{min-height:38px;padding:6px 10px;font-size:.85rem}
+.notes-more{align-self:flex-start}
 .status{font-size:.8rem;color:var(--muted);text-align:center}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;z-index:20}
 @media (max-width:480px){h1{font-size:1.55rem}.item{padding:10px 12px;gap:10px}}
 </style>
 
 <div class="wrap">
-  <header>
-    <div class="title-row">
-      <h1>Agenda de Horacio</h1>
-      <button type="button" class="tono" id="tono"></button>
-    </div>
-    <span class="today" id="today"></span>
+  <header class="topbar">
+    <div id="nav-left"></div>
+    <button type="button" class="tono" id="tono"></button>
   </header>
+
+  <!-- ===== NOTAS RÁPIDAS (primera pantalla) ===== -->
+  <section id="view-notas" class="wrap" style="padding:0;gap:10px" hidden>
+    <form class="card" id="f-note" autocomplete="off">
+      <h2 id="f-note-title" hidden>Editar nota</h2>
+      <div class="textbox">
+        <textarea id="note-text" placeholder="Escribí o dictá una nota rápida" required></textarea>
+        <button type="button" class="mic" data-target="note-text" aria-label="Dictar por voz" title="Dictar por voz"></button>
+      </div>
+      <p class="hint" data-hint-for="note-text"></p>
+      <div class="actions">
+        <button class="primary" type="submit" id="note-submit">Guardar nota</button>
+        <button type="button" class="ghost" id="note-cancel" hidden>Cancelar edición</button>
+      </div>
+    </form>
+    <input type="search" id="note-q" placeholder="Buscar en las notas" aria-label="Buscar en las notas">
+    <ul class="notes" id="note-list"></ul>
+    <button type="button" class="ghost notes-more" id="notes-done-toggle"></button>
+    <div id="done-notes" style="display:flex;flex-direction:column;gap:10px" hidden>
+      <h2>Terminadas</h2>
+      <ul class="notes" id="note-done-list"></ul>
+      <div id="clear-notes-box"></div>
+    </div>
+  </section>
 
   <!-- ===== INICIO: nueva tarea + menú de listados ===== -->
   <section id="view-inicio" class="wrap" style="padding:0;gap:14px">
@@ -152,8 +198,8 @@ a.back{display:inline-flex;align-items:center;min-height:44px;padding:6px 14px 6
       <div class="cats" role="radiogroup" aria-label="Tipo de tarea">
         <button type="button" role="radio" class="c-fecha" data-cat="fecha">Tarea con fecha</button>
         <button type="button" role="radio" class="c-urgente" data-cat="urgente">Urgente sin fecha</button>
-        <button type="button" role="radio" class="c-recordatorio" data-cat="recordatorio">Sin fecha (recordatorio)</button>
       </div>
+      <p class="hint warn" id="cat-hint" hidden>Elegí si es una tarea con fecha o urgente.</p>
       <label for="task-date" id="task-date-box" hidden>Fecha<input type="date" id="task-date"></label>
       <div class="actions">
         <button class="primary" type="submit" id="task-submit">Guardar tarea</button>
@@ -268,7 +314,6 @@ function relLabel(s){
   if(d>1 && d<7) return `En ${d} días`; if(d<0) return `Hace ${-d} días`;
   return "";
 }
-$("#today").textContent = fmtLong(isoToday()).replace(/^./,c=>c.toUpperCase());
 
 /* ---------- almacenamiento: base de datos privada de Claude, o el navegador ---------- */
 const LS_KEY = "agenda-horacio-v1", LS_DEL = "agenda-horacio-borrados";
@@ -323,6 +368,7 @@ async function init(){
     }
     for(const it of items){ const r = remote.get(it.id); if(!r || (it.updatedAt||0) > (r.updatedAt||0)) dirty.add(it.id); }
     if(changed){ lsSet(LS_KEY, items); render(); }
+    migrateReminders();
     setStatus("Guardado en el teléfono y en tu cuenta.");
     flush();
   }catch{ setStatus("Guardado en este teléfono."); }
@@ -332,7 +378,7 @@ async function init(){
 const ui = (()=>{ let s={}; try{ s=JSON.parse(localStorage.getItem("agenda-ui")||"{}"); }catch{}
   return Object.assign({sorts:{}, eview:"time", eperiod:"next", etypes:[]}, s); })();
 const saveUI = () => { try{ localStorage.setItem("agenda-ui", JSON.stringify(ui)); }catch{} };
-let formMode="tarea", editTask=null, editEv=null, confirmClear=false, confirmDel=null, taskCat="recordatorio";
+let formMode="tarea", editTask=null, editEv=null, confirmClear=false, confirmDel=null, taskCat="";
 
 /* ---------- listados y navegación ---------- */
 const CATS = {
@@ -344,17 +390,18 @@ const catOf = t => t.cat || (t.date ? "fecha" : (t.prio==1 ? "urgente" : "record
 const LISTS = {
   urgentes:{title:"Tareas urgentes", c:"--danger", filter:t=>!t.done && catOf(t)==="urgente", empty:"No hay tareas urgentes"},
   programadas:{title:"Tareas con fecha programada", c:"--t-reunion", filter:t=>!t.done && catOf(t)==="fecha", empty:"No hay tareas con fecha"},
-  recordatorios:{title:"Tareas sin fecha (recordatorios)", c:"--accent", filter:t=>!t.done && catOf(t)==="recordatorio", empty:"No hay recordatorios"},
   realizadas:{title:"Tareas realizadas", c:"--t-otro", filter:t=>t.done, empty:"Todavía no marcaste tareas como realizadas"},
 };
 let view = "inicio";
 function route(){
   const h = location.hash.slice(1);
-  view = LISTS[h] ? h : (h==="eventos" ? "eventos" : "inicio");
+  view = LISTS[h] ? h : (["eventos","inicio"].includes(h) ? h : (h==="tareas" ? "inicio" : "notas"));
+  $("#view-notas").hidden = view!=="notas";
   $("#view-inicio").hidden = view!=="inicio";
   $("#view-eventos").hidden = view!=="eventos";
   $("#view-lista").hidden = !LISTS[view];
   confirmDel=null; confirmClear=false;
+  if(view!=="inicio" && noteConvert){ resetTaskForm(); resetEvForm(); }
   render(); scrollTo(0,0);
 }
 addEventListener("hashchange", route);
@@ -365,7 +412,7 @@ function esc(s){ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&
 function render(){
   const tasks = items.filter(i=>i.kind==="task");
   const evs = items.filter(i=>i.kind==="event");
-  renderMenu(tasks, evs); renderTasks(tasks); renderEvents(evs); renderPeople(); renderCats(); renderMode();
+  renderTop(tasks); renderNotes(); renderMenu(tasks, evs); renderTasks(tasks); renderEvents(evs); renderPeople(); renderCats(); renderMode();
 }
 
 function renderMenu(tasks, evs){
@@ -376,7 +423,6 @@ function renderMenu(tasks, evs){
   const rows = [
     ["urgentes", n("urgentes") ? "Para hacer cuanto antes" : "Nada urgente"],
     ["programadas", prog.length ? [hoy?`${hoy} para hoy`:"", venc?`<span class="late">${venc} vencida${venc>1?"s":""}</span>`:"", !hoy&&!venc?`La próxima: ${fmtShort(prog.map(t=>t.date).sort()[0])}`:""].filter(Boolean).join(" · ") : "Ninguna programada"],
-    ["recordatorios", "Cosas para tener presentes"],
     ["eventos", next.length ? `Próximo: ${fmtShort(next[0].date)} · ${esc(next[0].text.slice(0,40))}${next[0].text.length>40?"…":""}` : "Sin eventos próximos", next.length, "--t-discusion", "Eventos"],
     ["realizadas", "Tareas ya hechas"],
   ];
@@ -437,6 +483,7 @@ function renderMode(){
 }
 function renderCats(){
   $$("[data-cat]").forEach(b=>b.setAttribute("aria-checked", b.dataset.cat===taskCat));
+  if(taskCat) $("#cat-hint").hidden=true;
   $("#task-date-box").hidden = taskCat!=="fecha";
   $("#task-date").required = taskCat==="fecha";
 }
@@ -492,12 +539,14 @@ $("#f-task").addEventListener("submit", e=>{
   e.preventDefault(); stopMic();
   const text=$("#task-text").value.trim(); if(!text) return;
   const base = editTask ? items.find(i=>i.id===editTask) : {id:uid(), kind:"task", done:false, created:Date.now()};
+  if(!taskCat){ $("#cat-hint").hidden=false; return; }
   const date = taskCat==="fecha" ? $("#task-date").value : "";
   store.put({...base, text, cat:taskCat, date, voice: base.voice||dictated.has("task-text")});
-  toast(`${editTask?"Actualizada":"Guardada"} en ${{fecha:"Con fecha",urgente:"Urgentes",recordatorio:"Recordatorios"}[taskCat]}`);
+  if(noteConvert){ store.remove(noteConvert); noteConvert=null; }
+  toast(`${editTask?"Actualizada":"Guardada"} en ${{fecha:"Con fecha",urgente:"Urgentes"}[taskCat]}`);
   resetTaskForm();
 });
-function resetTaskForm(){ editTask=null; $("#f-task").reset(); $("#task-date").value=""; taskCat="recordatorio"; renderCats(); dictated.delete("task-text");
+function resetTaskForm(){ editTask=null; $("#f-task").reset(); $("#task-date").value=""; taskCat=""; renderCats(); dictated.delete("task-text"); noteConvert=null;
   $("#f-task-title").hidden=true; $("#task-submit").textContent="Guardar tarea"; $("#task-cancel").hidden=true; }
 $("#task-cancel").onclick = resetTaskForm;
 
@@ -506,9 +555,10 @@ $("#f-ev").addEventListener("submit", e=>{
   const text=$("#ev-text").value.trim(); if(!text) return;
   const base = editEv ? items.find(i=>i.id===editEv) : {id:uid(), kind:"event", created:Date.now()};
   store.put({...base, text, date:$("#ev-date").value, time:$("#ev-time").value||"", place:$("#ev-place").value.trim(), type:$("#ev-type").value, people: $("#ev-type").value==="discusion" ? [...picked] : []});
+  if(noteConvert){ store.remove(noteConvert); noteConvert=null; }
   toast(editEv?"Evento actualizado":"Evento guardado"); resetEvForm();
 });
-function resetEvForm(){ editEv=null; $("#f-ev").reset(); $("#ev-date").value=isoToday(); picked=[]; renderPeople();
+function resetEvForm(){ editEv=null; noteConvert=null; $("#f-ev").reset(); $("#ev-date").value=isoToday(); picked=[]; renderPeople();
   $("#f-ev-title").hidden=true; $("#ev-submit").textContent="Guardar evento"; $("#ev-cancel").hidden=true; }
 $("#ev-cancel").onclick = resetEvForm;
 $("#ev-type").innerHTML = TYPES.map(t=>`<option value="${t.id}">${t.name}</option>`).join("");
@@ -540,6 +590,83 @@ function addNewPerson(){
 $("#newp-add").addEventListener("click", addNewPerson);
 $("#newp-name").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addNewPerson(); } });
 
+/* ---------- notas rápidas ---------- */
+let editNote=null, openNote=null, noteConvert=null, showDoneNotes=false, confirmClearNotes=false, noteQ="";
+const fmtNoteDate = ts => { const d=new Date(ts||Date.now()), now=new Date();
+  if(d.toDateString()===now.toDateString()) return "hoy "+pad(d.getHours())+":"+pad(d.getMinutes());
+  return d.toLocaleDateString("es-AR",{day:"numeric",month:"short",...(d.getFullYear()!==now.getFullYear()?{year:"2-digit"}:{})}).replace(".",""); };
+function renderTop(tasks){
+  const L=$("#nav-left");
+  if(view==="notas"){
+    const urg=tasks.filter(t=>!t.done&&catOf(t)==="urgente").length;
+    const prog=tasks.filter(t=>!t.done&&catOf(t)==="fecha"&&t.date);
+    const hoy=prog.filter(t=>dayDiff(t.date)===0).length, venc=prog.filter(t=>dayDiff(t.date)<0).length;
+    const evh=items.filter(e=>e.kind==="event"&&dayDiff(e.date)===0).length;
+    const badge=[urg&&`${urg} urgente${urg>1?"s":""}`, hoy&&`${hoy} para hoy`, venc&&`${venc} vencida${venc>1?"s":""}`, evh&&`${evh} evento${evh>1?"s":""} hoy`].filter(Boolean).join(" · ");
+    L.innerHTML=`<a href="#inicio" class="go"><span class="gt"><b>Tareas y eventos</b><span class="badge">${badge}</span></span><span class="arrow" aria-hidden="true">→</span></a>`;
+  } else if(view==="inicio") L.innerHTML=`<a href="#notas" class="back">← Notas</a>`;
+  else L.innerHTML="";
+}
+function noteRow(n){
+  const open=openNote===n.id;
+  const acts = !open ? "" : n.done
+    ? `<div class="acts"><button data-note-undo="${n.id}">Volver a pendientes</button>${confirmDel===n.id?`<button class="danger solid" data-del-yes="${n.id}">Sí, borrar</button><button class="ghost" data-del-no>No</button>`:`<button class="danger" data-del="${n.id}">Borrar</button>`}</div>`
+    : `<div class="acts"><button data-note-edit="${n.id}">Editar</button><button data-note-pin="${n.id}">${n.pinned?"Desfijar":"Fijar arriba"}</button><button data-note-task="${n.id}">Pasar a tarea</button><button data-note-ev="${n.id}">Pasar a evento</button></div>`;
+  return `<li class="note ${n.done?"done":""} ${n.pinned&&!n.done?"pinned":""}"><div class="row">
+    <button class="tick" ${n.done?`data-note-undo="${n.id}" aria-label="Volver a pendientes"`:`data-note-done="${n.id}" aria-label="Tachar nota"`}><span></span></button>
+    <button class="ntext" data-note-open="${n.id}" aria-expanded="${open}"><span class="t">${n.pinned&&!n.done?'<span class="pin">★</span>':""}${esc(n.text)}</span><span class="nd">${fmtNoteDate(n.created)}</span></button>
+  </div>${acts}</li>`;
+}
+function renderNotes(){
+  const q=noteQ.trim().toLowerCase();
+  const all=items.filter(i=>i.kind==="note" && (!q || i.text.toLowerCase().includes(q)));
+  const pend=all.filter(n=>!n.done).sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0) || (b.created||0)-(a.created||0));
+  const done=all.filter(n=>n.done).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
+  $("#note-list").innerHTML = pend.length ? pend.map(noteRow).join("") : `<li class="empty" style="margin-top:10px"><strong>${q?"Ninguna nota coincide":"No hay notas pendientes"}</strong>${q?"Probá con otra palabra.":"Escribí o dictá una arriba y tocá “Guardar nota”."}</li>`;
+  $("#notes-done-toggle").textContent = showDoneNotes ? "Ocultar terminadas" : `Ver terminadas (${done.length})`;
+  $("#notes-done-toggle").hidden = !done.length && !showDoneNotes;
+  $("#done-notes").hidden = !showDoneNotes;
+  $("#note-done-list").innerHTML = done.length ? done.map(noteRow).join("") : `<li class="empty" style="margin-top:10px"><strong>No hay notas terminadas</strong>Tocá el círculo de una nota para tacharla.</li>`;
+  $("#clear-notes-box").innerHTML = !done.length ? "" : confirmClearNotes
+    ? `<div class="confirm">¿Borrar las ${done.length} notas terminadas? No se puede deshacer. <button class="danger solid" id="clear-notes-yes">Sí, borrar</button><button class="ghost" id="clear-notes-no">Cancelar</button></div>`
+    : `<button class="danger" id="clear-notes">Borrar las terminadas (${done.length})</button>`;
+}
+$("#f-note").addEventListener("submit", e=>{
+  e.preventDefault(); stopMic();
+  const text=$("#note-text").value.trim(); if(!text) return;
+  const base = editNote ? items.find(i=>i.id===editNote) : {id:uid(), kind:"note", done:false, created:Date.now()};
+  store.put({...base, text}); toast(editNote?"Nota actualizada":"Nota guardada"); resetNoteForm();
+});
+function resetNoteForm(){ editNote=null; $("#f-note").reset(); $("#f-note-title").hidden=true; $("#note-submit").textContent="Guardar nota"; $("#note-cancel").hidden=true; }
+$("#note-cancel").onclick = resetNoteForm;
+$("#note-q").addEventListener("input", e=>{ noteQ=e.target.value; renderNotes(); });
+function noteClick(b,d){
+  const n = id => items.find(i=>i.id===id);
+  if(d.noteOpen){ openNote = openNote===d.noteOpen ? null : d.noteOpen; confirmDel=null; renderNotes(); }
+  else if(d.noteDone){ const x=n(d.noteDone); openNote=null; store.put({...x, done:true, doneAt:Date.now()}); toast("Pasó a Terminadas"); }
+  else if(d.noteUndo){ const x=n(d.noteUndo); openNote=null; store.put({...x, done:false}); toast("Volvió a pendientes"); }
+  else if(d.notePin){ const x=n(d.notePin); openNote=null; store.put({...x, pinned:!x.pinned}); }
+  else if(d.noteEdit){ const x=n(d.noteEdit); editNote=x.id; openNote=null; $("#note-text").value=x.text; $("#f-note-title").hidden=false;
+    $("#note-submit").textContent="Guardar cambios"; $("#note-cancel").hidden=false; renderNotes(); scrollTo({top:0,behavior:"smooth"}); $("#note-text").focus(); }
+  else if(d.noteTask){ const x=n(d.noteTask); openNote=null; resetTaskForm(); noteConvert=x.id; formMode="tarea"; $("#task-text").value=x.text;
+    $("#f-task-title").textContent="Pasar nota a tarea"; $("#f-task-title").hidden=false; $("#task-cancel").hidden=false; location.hash="inicio"; }
+  else if(d.noteEv){ const x=n(d.noteEv); openNote=null; resetEvForm(); noteConvert=x.id; formMode="evento"; $("#ev-text").value=x.text;
+    $("#f-ev-title").textContent="Pasar nota a evento"; $("#f-ev-title").hidden=false; $("#ev-cancel").hidden=false; location.hash="inicio"; }
+  else if(b.id==="notes-done-toggle"){ showDoneNotes=!showDoneNotes; renderNotes(); }
+  else if(b.id==="clear-notes"){ confirmClearNotes=true; renderNotes(); }
+  else if(b.id==="clear-notes-no"){ confirmClearNotes=false; renderNotes(); }
+  else if(b.id==="clear-notes-yes"){ confirmClearNotes=false; const done=items.filter(i=>i.kind==="note"&&i.done); done.forEach(x=>store.remove(x.id)); toast(`${done.length} notas borradas`); }
+  else return false;
+  return true;
+}
+/* Los recordatorios (tareas sin fecha) ahora son notas rápidas. */
+function migrateReminders(){
+  items.filter(t=>t.kind==="task" && catOf(t)==="recordatorio").forEach(t=>{
+    const {cat, prio, date, ...rest} = t;
+    store.put({...rest, kind:"note", ...(t.done?{doneAt:t.updatedAt||Date.now()}:{})});
+  });
+}
+
 /* ---------- tono blanco / negro ---------- */
 const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
 const MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>';
@@ -555,6 +682,7 @@ $("#tono").addEventListener("click", ()=>{ ui.tono = ui.tono==="oscuro" ? "claro
 document.addEventListener("click", e=>{
   const b = e.target.closest("button,input[data-toggle]"); if(!b) return;
   const d = b.dataset;
+  if(noteClick(b,d)) return;
   if(d.unperson!==undefined){ picked = picked.filter(n=>n!==d.unperson); renderPeople(); }
   else if(d.mode){ stopMic(); formMode=d.mode; renderMode(); }
   else if(d.cat){ taskCat=d.cat; if(taskCat==="fecha" && !$("#task-date").value) $("#task-date").value=isoToday(); renderCats(); }
@@ -568,12 +696,12 @@ document.addEventListener("click", e=>{
   else if(d.editTask){ const t=items.find(i=>i.id===d.editTask); editTask=t.id;
     if(location.hash!=="#inicio") location.hash="inicio";
     $("#task-text").value=t.text; $("#task-date").value=t.date||""; taskCat=catOf(t); renderCats();
-    formMode="tarea"; renderMode(); $("#f-task-title").hidden=false; $("#task-submit").textContent="Guardar cambios"; $("#task-cancel").hidden=false;
+    formMode="tarea"; renderMode(); $("#f-task-title").textContent="Editar tarea"; $("#f-task-title").hidden=false; $("#task-submit").textContent="Guardar cambios"; $("#task-cancel").hidden=false;
     setTimeout(()=>{ $("#f-task").scrollIntoView({behavior:"smooth"}); $("#task-text").focus(); }, 50); }
   else if(d.editEv){ const t=items.find(i=>i.id===d.editEv); editEv=t.id;
     if(location.hash!=="#inicio") location.hash="inicio"; formMode="evento"; renderMode();
     $("#ev-text").value=t.text; $("#ev-date").value=t.date; $("#ev-time").value=t.time||""; $("#ev-place").value=t.place||""; $("#ev-type").value=t.type; picked=[...(t.people||[])]; renderPeople();
-    $("#f-ev-title").hidden=false; $("#ev-submit").textContent="Guardar cambios"; $("#ev-cancel").hidden=false;
+    $("#f-ev-title").textContent="Editar evento"; $("#f-ev-title").hidden=false; $("#ev-submit").textContent="Guardar cambios"; $("#ev-cancel").hidden=false;
     setTimeout(()=>{ $("#f-ev").scrollIntoView({behavior:"smooth"}); $("#ev-text").focus(); }, 50); }
   else if(b.id==="clear-done"){ confirmClear=true; render(); }
   else if(b.id==="clear-no"){ confirmClear=false; render(); }
@@ -610,5 +738,5 @@ function startMic(btn){
 function stopMic(){ if(rec){ try{rec.stop();}catch{} } }
 
 /* ---------- arranque ---------- */
-applyTono(ui.tono); resetTaskForm(); resetEvForm(); route(); init();
+applyTono(ui.tono); resetTaskForm(); resetEvForm(); migrateReminders(); route(); init();
 </script>

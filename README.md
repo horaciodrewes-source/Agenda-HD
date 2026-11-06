@@ -24,6 +24,10 @@ Agenda personal de tareas y eventos, en una sola página web (HTML y JavaScript,
 - **En el celular (como la app de Golf):** abrí https://horaciodrewes-source.github.io/Agenda-HD/ y elegí "Agregar a pantalla de inicio" (Android: menú ⋮ de Chrome; iPhone: botón Compartir de Safari). Queda como una app con su ícono y funciona sin internet. Los datos se guardan en el teléfono.
 - **Dentro de Claude:** https://claude.ai/artifact/2ydTsJW2suruP3Auxzo1v4. Ahí los datos se guardan en el navegador y además en tu cuenta de Claude.
 
+## En la PC
+
+En una pantalla ancha la app usa todo el ancho: el formulario queda a la izquierda y las listas a la derecha. En Chrome se puede instalar como app desde el ícono **Instalar** de la barra de direcciones.
+
 ## Celular y PC con los mismos datos
 
 El botón de las flechas (arriba) abre "Celular y PC". Ahí se cargan tres datos, iguales en cada aparato:

@@ -1,6 +1,7 @@
 <title>Agenda de Horacio</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
+[hidden]{display:none!important}
 /* Layout: una columna para el celular, encabezado fijo, pestañas grandes, formulario arriba de cada lista. Mismo estilo que la Tarjeta de Golf. */
 /* Tono blanco por defecto (se lee mejor). El botón del encabezado pasa a fondo negro, que en pantallas OLED gasta menos batería. */
 :root{
@@ -108,6 +109,10 @@ ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;ga
 .modes button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 #ev-chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 #ev-chips .chip{justify-content:center;text-align:center;padding:6px 6px;min-height:46px;font-size:.85rem;line-height:1.15}
+.home a{min-height:92px;padding:16px 18px}
+.home .mt b{font-size:1.4rem}
+.home .mt span{font-size:.95rem}
+.vt{font:700 1.2rem/1.15 var(--display);align-self:center;margin-left:10px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .menu{display:flex;flex-direction:column;gap:8px}
 .menu a{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:var(--r);text-decoration:none;color:var(--ink)}
 .menu a:active{background:var(--accent-soft)}
@@ -168,9 +173,9 @@ ul.notes{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
   #view-notas,#view-inicio{display:grid;grid-template-columns:minmax(340px,420px) minmax(0,1fr);column-gap:28px;row-gap:12px;align-items:start;align-content:start}
   #view-notas>*{grid-column:2}
   #view-notas>#f-note{grid-column:1;grid-row:1/span 6;position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px)}
-  #view-inicio>.modes{grid-column:1;grid-row:1}
-  #view-inicio>form{grid-column:1;grid-row:2}
+  #view-inicio>form{grid-column:1;grid-row:1/span 2}
   #view-inicio>h2{grid-column:2;grid-row:1;align-self:center}
+  .home{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))}
   #view-inicio>.menu{grid-column:2;grid-row:2;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
   #ev-chips{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
   ul.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr))}
@@ -185,7 +190,12 @@ ul.notes{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
     <button type="button" class="tono" id="tono"></button>
   </header>
 
-  <!-- ===== NOTAS RÁPIDAS (primera pantalla) ===== -->
+  <!-- ===== MENÚ DE INICIO ===== -->
+  <section id="view-home" class="wrap" style="padding:0;gap:12px" hidden>
+    <nav class="menu home" id="home-menu" aria-label="Secciones"></nav>
+  </section>
+
+  <!-- ===== NOTAS (personales o de HD Máquinas Ópticas) ===== -->
   <section id="view-notas" class="wrap" style="padding:0;gap:10px" hidden>
     <form class="card" id="f-note" autocomplete="off">
       <h2 id="f-note-title" hidden>Editar nota</h2>
@@ -211,10 +221,6 @@ ul.notes{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 
   <!-- ===== INICIO: nueva tarea + menú de listados ===== -->
   <section id="view-inicio" class="wrap" style="padding:0;gap:14px">
-    <div class="modes" role="tablist" aria-label="Qué querés cargar">
-      <button type="button" role="tab" data-mode="tarea">Nueva tarea</button>
-      <button type="button" role="tab" data-mode="evento">Nuevo evento</button>
-    </div>
     <form class="card" id="f-task" autocomplete="off">
       <h2 id="f-task-title" hidden>Editar tarea</h2>
       <div class="textbox">
@@ -233,7 +239,32 @@ ul.notes{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
         <button type="button" class="ghost" id="task-cancel" hidden>Cancelar edición</button>
       </div>
     </form>
-    <form class="card" id="f-ev" autocomplete="off" hidden>
+    <h2>Listados</h2>
+    <nav class="menu" id="menu" aria-label="Listados"></nav>
+  </section>
+
+  <!-- ===== UN LISTADO DE TAREAS ===== -->
+  <section id="view-lista" class="wrap" style="padding:0;gap:14px" hidden>
+    <div class="listhead">
+      <a href="#tareas" class="back">← Tareas</a>
+      <h2 id="lista-title"></h2>
+    </div>
+    <div class="toolbar">
+      <label style="flex-direction:row;align-items:center;gap:8px" for="task-sort">Ordenar
+        <select id="task-sort"></select>
+      </label>
+    </div>
+    <ul class="list" id="task-list"></ul>
+    <div id="clear-done-box"></div>
+  </section>
+
+  <!-- ===== EVENTOS ===== -->
+  <section id="view-eventos" class="wrap" style="padding:0;gap:14px" hidden>
+    <div class="listhead">
+      <a href="#menu" class="back">← Inicio</a>
+      <h2>Eventos</h2>
+    </div>
+    <form class="card" id="f-ev" autocomplete="off">
       <h2 id="f-ev-title" hidden>Editar evento</h2>
       <div class="textbox">
         <textarea id="ev-text" placeholder="Descripción del evento (podés dictarla)" required></textarea>
@@ -263,31 +294,6 @@ ul.notes{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
         <button type="button" class="ghost" id="ev-cancel" hidden>Cancelar edición</button>
       </div>
     </form>
-    <h2>Listados</h2>
-    <nav class="menu" id="menu" aria-label="Listados"></nav>
-  </section>
-
-  <!-- ===== UN LISTADO DE TAREAS ===== -->
-  <section id="view-lista" class="wrap" style="padding:0;gap:14px" hidden>
-    <div class="listhead">
-      <a href="#inicio" class="back">← Volver</a>
-      <h2 id="lista-title"></h2>
-    </div>
-    <div class="toolbar">
-      <label style="flex-direction:row;align-items:center;gap:8px" for="task-sort">Ordenar
-        <select id="task-sort"></select>
-      </label>
-    </div>
-    <ul class="list" id="task-list"></ul>
-    <div id="clear-done-box"></div>
-  </section>
-
-  <!-- ===== EVENTOS ===== -->
-  <section id="view-eventos" class="wrap" style="padding:0;gap:14px" hidden>
-    <div class="listhead">
-      <a href="#inicio" class="back">← Volver</a>
-      <h2>Eventos</h2>
-    </div>
 
     <div class="toolbar">
       <div class="seg" role="group" aria-label="Vista">
@@ -307,7 +313,7 @@ ul.notes{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
   <!-- ===== SINCRONIZAR CELULAR Y PC ===== -->
   <section id="view-sync" class="wrap" style="padding:0;gap:14px" hidden>
     <div class="listhead">
-      <a href="#notas" class="back">← Volver</a>
+      <a href="#menu" class="back">← Inicio</a>
       <h2>Celular y PC</h2>
     </div>
     <form class="card" id="f-sync" autocomplete="off">
@@ -452,17 +458,24 @@ const LISTS = {
   programadas:{title:"Tareas con fecha programada", c:"--t-reunion", filter:t=>!t.done && catOf(t)==="fecha", empty:"No hay tareas con fecha"},
   realizadas:{title:"Tareas realizadas", c:"--t-otro", filter:t=>t.done, empty:"Todavía no marcaste tareas como realizadas"},
 };
-let view = "inicio";
+let view = "home", book = "personal";
+const BOOKS = {personal:{title:"Notas", sub:"Personales", c:"--accent", ph:"Escribí o dictá una nota rápida"},
+               hd:{title:"Notas de HD Maq.", sub:"Trabajo · HD Máquinas Ópticas", c:"--t-reunion", ph:"Escribí o dictá una nota de trabajo"}};
+const bookOf = n => n.book==="hd" ? "hd" : "personal";
 function route(){
   const h = location.hash.slice(1);
-  view = LISTS[h] ? h : (["eventos","inicio"].includes(h) ? h : (h==="tareas" ? "inicio" : (h==="sincronizar" ? "sync" : "notas")));
+  view = LISTS[h] ? h : h==="eventos" ? "eventos" : (h==="tareas"||h==="inicio") ? "inicio" : h==="sincronizar" ? "sync" : (h==="notas"||h==="hd") ? "notas" : "home";
+  if(view==="notas"){ const nb = h==="hd" ? "hd" : "personal";
+    if(nb!==book){ book=nb; resetNoteForm(); openNote=null; showDoneNotes=false; noteQ=""; $("#note-q").value=""; }
+    $("#note-text").placeholder = BOOKS[book].ph; }
+  $("#view-home").hidden = view!=="home";
   $("#view-sync").hidden = view!=="sync"; if(view==="sync") renderSync();
   $("#view-notas").hidden = view!=="notas";
   $("#view-inicio").hidden = view!=="inicio";
   $("#view-eventos").hidden = view!=="eventos";
   $("#view-lista").hidden = !LISTS[view];
   confirmDel=null; confirmClear=false;
-  if(view!=="inicio" && noteConvert){ resetTaskForm(); resetEvForm(); }
+  if(noteConvert && !["inicio","eventos"].includes(view)){ resetTaskForm(); resetEvForm(); }
   render(); scrollTo(0,0);
 }
 addEventListener("hashchange", route);
@@ -473,9 +486,25 @@ function esc(s){ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&
 function render(){
   const tasks = items.filter(i=>i.kind==="task");
   const evs = items.filter(i=>i.kind==="event");
-  renderTop(tasks); renderNotes(); renderMenu(tasks, evs); renderTasks(tasks); renderEvents(evs); renderPeople(); renderCats(); renderMode();
+  renderTop(tasks); renderHome(tasks, evs); renderNotes(); renderMenu(tasks, evs); renderTasks(tasks); renderEvents(evs); renderPeople(); renderCats(); renderMode();
 }
 
+function renderHome(tasks, evs){
+  const notes = b => items.filter(i=>i.kind==="note" && !i.done && bookOf(i)===b).length;
+  const pend = tasks.filter(t=>!t.done && catOf(t)!=="recordatorio");
+  const urg = pend.filter(t=>catOf(t)==="urgente").length;
+  const prog = pend.filter(t=>catOf(t)==="fecha" && t.date);
+  const hoy = prog.filter(t=>dayDiff(t.date)===0).length, venc = prog.filter(t=>dayDiff(t.date)<0).length;
+  const next = evs.filter(e=>dayDiff(e.date)>=0).sort((a,b)=>(a.date+(a.time||"")).localeCompare(b.date+(b.time||"")));
+  const tsub = [urg&&`${urg} urgente${urg>1?"s":""}`, hoy&&`${hoy} para hoy`, venc&&`<span class="late">${venc} vencida${venc>1?"s":""}</span>`].filter(Boolean).join(" · ") || (pend.length ? "Con fecha y urgentes" : "Nada pendiente");
+  const rows = [
+    ["notas", BOOKS.personal.title, BOOKS.personal.sub, notes("personal"), BOOKS.personal.c],
+    ["hd", BOOKS.hd.title, BOOKS.hd.sub, notes("hd"), BOOKS.hd.c],
+    ["tareas", "Tareas", tsub, pend.length, "--danger"],
+    ["eventos", "Eventos", next.length ? `Próximo: ${fmtShort(next[0].date)} · ${esc(next[0].text.slice(0,36))}${next[0].text.length>36?"…":""}` : "Sin eventos próximos", next.length, "--t-discusion"],
+  ];
+  $("#home-menu").innerHTML = rows.map(([h,t,sub,num,c])=>`<a href="#${h}" style="--c:var(${c})"><span class="mt"><b>${t}</b><span>${sub}</span></span><span class="num">${num}</span><span class="arrow" aria-hidden="true">›</span></a>`).join("");
+}
 function renderMenu(tasks, evs){
   const n = k => tasks.filter(LISTS[k].filter).length;
   const prog = tasks.filter(LISTS.programadas.filter);
@@ -484,7 +513,6 @@ function renderMenu(tasks, evs){
   const rows = [
     ["urgentes", n("urgentes") ? "Para hacer cuanto antes" : "Nada urgente"],
     ["programadas", prog.length ? [hoy?`${hoy} para hoy`:"", venc?`<span class="late">${venc} vencida${venc>1?"s":""}</span>`:"", !hoy&&!venc?`La próxima: ${fmtShort(prog.map(t=>t.date).sort()[0])}`:""].filter(Boolean).join(" · ") : "Ninguna programada"],
-    ["eventos", next.length ? `Próximo: ${fmtShort(next[0].date)} · ${esc(next[0].text.slice(0,40))}${next[0].text.length>40?"…":""}` : "Sin eventos próximos", next.length, "--t-discusion", "Eventos"],
     ["realizadas", "Tareas ya hechas"],
   ];
   $("#menu").innerHTML = rows.map(([k,sub,num,c,title])=>{
@@ -537,11 +565,7 @@ function renderTasks(tasks){
     : `<button class="danger" id="clear-done">Borrar las realizadas (${nDone})</button>`;
 }
 
-function renderMode(){
-  $$("[data-mode]").forEach(b=>b.setAttribute("aria-selected", b.dataset.mode===formMode));
-  $("#f-task").hidden = formMode!=="tarea";
-  $("#f-ev").hidden = formMode!=="evento";
-}
+function renderMode(){}
 function renderCats(){
   $$("[data-cat]").forEach(b=>b.setAttribute("aria-checked", b.dataset.cat===taskCat));
   if(taskCat) $("#cat-hint").hidden=true;
@@ -562,7 +586,7 @@ function renderEvents(evs){
   list.sort((a,b)=> ui.eperiod==="past" ? key(b).localeCompare(key(a)) : key(a).localeCompare(key(b)));
   const box = $("#ev-list");
   if(!list.length){
-    box.innerHTML = `<div class="empty"><strong>${evs.length?"No hay eventos con este filtro":"Todavía no hay eventos"}</strong>${evs.length?"Probá con otro tipo o período.":"Cargalos desde la pantalla principal, con “Nuevo evento”."}</div>`;
+    box.innerHTML = `<div class="empty"><strong>${evs.length?"No hay eventos con este filtro":"Todavía no hay eventos"}</strong>${evs.length?"Probá con otro tipo o período.":"Cargá el primero con el formulario de arriba."}</div>`;
     return;
   }
   const card = e => { const t=typeOf(e.type); const d=parseISO(e.date); const rel=relLabel(e.date);
@@ -658,14 +682,8 @@ const fmtNoteDate = ts => { const d=new Date(ts||Date.now()), now=new Date();
   return d.toLocaleDateString("es-AR",{day:"numeric",month:"short",...(d.getFullYear()!==now.getFullYear()?{year:"2-digit"}:{})}).replace(".",""); };
 function renderTop(tasks){
   const L=$("#nav-left");
-  if(view==="notas"){
-    const urg=tasks.filter(t=>!t.done&&catOf(t)==="urgente").length;
-    const prog=tasks.filter(t=>!t.done&&catOf(t)==="fecha"&&t.date);
-    const hoy=prog.filter(t=>dayDiff(t.date)===0).length, venc=prog.filter(t=>dayDiff(t.date)<0).length;
-    const evh=items.filter(e=>e.kind==="event"&&dayDiff(e.date)===0).length;
-    const badge=[urg&&`${urg} urgente${urg>1?"s":""}`, hoy&&`${hoy} para hoy`, venc&&`${venc} vencida${venc>1?"s":""}`, evh&&`${evh} evento${evh>1?"s":""} hoy`].filter(Boolean).join(" · ");
-    L.innerHTML=`<a href="#inicio" class="go"><span class="gt"><b>Tareas y eventos</b><span class="badge">${badge}</span></span><span class="arrow" aria-hidden="true">→</span></a>`;
-  } else if(view==="inicio") L.innerHTML=`<a href="#notas" class="back">← Notas</a>`;
+  if(view==="notas") L.innerHTML=`<a href="#menu" class="back">← Inicio</a><span class="vt" style="color:var(${BOOKS[book].c})">${BOOKS[book].title}</span>`;
+  else if(view==="inicio") L.innerHTML=`<a href="#menu" class="back">← Inicio</a><span class="vt" style="color:var(--danger)">Tareas</span>`;
   else L.innerHTML="";
 }
 /* Orden manual de las notas: cada nota tiene un número "order"; las que no lo tienen van por fecha, la más nueva arriba. */
@@ -712,7 +730,7 @@ function noteRow(n){
   const open=openNote===n.id;
   const acts = !open ? "" : n.done
     ? `<div class="acts"><button data-note-undo="${n.id}">Volver a pendientes</button>${confirmDel===n.id?`<button class="danger solid" data-del-yes="${n.id}">Sí, borrar</button><button class="ghost" data-del-no>No</button>`:`<button class="danger" data-del="${n.id}">Borrar</button>`}</div>`
-    : `<div class="acts"><button data-note-up="${n.id}" aria-label="Subir">↑ Subir</button><button data-note-down="${n.id}" aria-label="Bajar">↓ Bajar</button><button data-note-edit="${n.id}">Editar</button><button data-note-pin="${n.id}">${n.pinned?"Desfijar":"Fijar arriba"}</button><button data-note-task="${n.id}">Pasar a tarea</button><button data-note-ev="${n.id}">Pasar a evento</button></div>`;
+    : `<div class="acts"><button data-note-up="${n.id}" aria-label="Subir">↑ Subir</button><button data-note-down="${n.id}" aria-label="Bajar">↓ Bajar</button><button data-note-edit="${n.id}">Editar</button><button data-note-pin="${n.id}">${n.pinned?"Desfijar":"Fijar arriba"}</button><button data-note-task="${n.id}">Pasar a tarea</button><button data-note-ev="${n.id}">Pasar a evento</button><button data-note-book="${n.id}">${bookOf(n)==="hd"?"Mover a Notas":"Mover a HD Maq."}</button></div>`;
   return `<li class="note ${n.done?"done":""} ${n.pinned&&!n.done?"pinned":""}"><div class="row">
     <button class="tick" ${n.done?`data-note-undo="${n.id}" aria-label="Volver a pendientes"`:`data-note-done="${n.id}" aria-label="Tachar nota"`}><span></span></button>
     <button class="ntext" data-note-open="${n.id}" aria-expanded="${open}"><span class="t">${n.pinned&&!n.done?'<span class="pin">★</span>':""}${esc(n.text)}</span><span class="nd">${fmtNoteDate(n.created)}</span></button>
@@ -721,7 +739,7 @@ function noteRow(n){
 }
 function renderNotes(){
   const q=noteQ.trim().toLowerCase();
-  const all=items.filter(i=>i.kind==="note" && (!q || i.text.toLowerCase().includes(q)));
+  const all=items.filter(i=>i.kind==="note" && bookOf(i)===book && (!q || i.text.toLowerCase().includes(q)));
   const pend=all.filter(n=>!n.done).sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0) || noteKey(a)-noteKey(b));
   shownPend = pend;
   const done=all.filter(n=>n.done).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
@@ -737,7 +755,7 @@ function renderNotes(){
 $("#f-note").addEventListener("submit", e=>{
   e.preventDefault(); stopMic();
   const text=$("#note-text").value.trim(); if(!text) return;
-  const base = editNote ? items.find(i=>i.id===editNote) : {id:uid(), kind:"note", done:false, created:Date.now()};
+  const base = editNote ? items.find(i=>i.id===editNote) : {id:uid(), kind:"note", book, done:false, created:Date.now()};
   store.put({...base, text}); toast(editNote?"Nota actualizada":"Nota guardada"); resetNoteForm();
 });
 function resetNoteForm(){ editNote=null; $("#f-note").reset(); $("#f-note-title").hidden=true; $("#note-submit").textContent="Guardar nota"; $("#note-cancel").hidden=true; }
@@ -750,13 +768,14 @@ function noteClick(b,d){
   else if(d.noteUndo){ const x=n(d.noteUndo); openNote=null; store.put({...x, done:false}); toast("Volvió a pendientes"); }
   else if(d.noteUp){ const i=shownPend.findIndex(x=>x.id===d.noteUp); moveNote(d.noteUp, i-1); }
   else if(d.noteDown){ const i=shownPend.findIndex(x=>x.id===d.noteDown); moveNote(d.noteDown, i+1); }
+  else if(d.noteBook){ const x=n(d.noteBook); openNote=null; const nb=bookOf(x)==="hd"?"personal":"hd"; store.put({...x, book:nb, order:undefined}); toast(`Pasó a ${BOOKS[nb].title}`); }
   else if(d.notePin){ const x=n(d.notePin); openNote=null; store.put({...x, pinned:!x.pinned}); }
   else if(d.noteEdit){ const x=n(d.noteEdit); editNote=x.id; openNote=null; $("#note-text").value=x.text; $("#f-note-title").hidden=false;
     $("#note-submit").textContent="Guardar cambios"; $("#note-cancel").hidden=false; renderNotes(); scrollTo({top:0,behavior:"smooth"}); $("#note-text").focus(); }
   else if(d.noteTask){ const x=n(d.noteTask); openNote=null; resetTaskForm(); noteConvert=x.id; formMode="tarea"; $("#task-text").value=x.text;
-    $("#f-task-title").textContent="Pasar nota a tarea"; $("#f-task-title").hidden=false; $("#task-cancel").hidden=false; location.hash="inicio"; }
+    $("#f-task-title").textContent="Pasar nota a tarea"; $("#f-task-title").hidden=false; $("#task-cancel").hidden=false; location.hash="tareas"; }
   else if(d.noteEv){ const x=n(d.noteEv); openNote=null; resetEvForm(); noteConvert=x.id; formMode="evento"; $("#ev-text").value=x.text;
-    $("#f-ev-title").textContent="Pasar nota a evento"; $("#f-ev-title").hidden=false; $("#ev-cancel").hidden=false; location.hash="inicio"; }
+    $("#f-ev-title").textContent="Pasar nota a evento"; $("#f-ev-title").hidden=false; $("#ev-cancel").hidden=false; location.hash="eventos"; }
   else if(b.id==="notes-done-toggle"){ showDoneNotes=!showDoneNotes; renderNotes(); }
   else if(b.id==="clear-notes"){ confirmClearNotes=true; renderNotes(); }
   else if(b.id==="clear-notes-no"){ confirmClearNotes=false; renderNotes(); }
@@ -946,12 +965,12 @@ document.addEventListener("click", e=>{
   else if(d.delYes){ confirmDel=null; store.remove(d.delYes); toast("Borrado"); }
   else if(d.delNo!==undefined){ confirmDel=null; render(); }
   else if(d.editTask){ const t=items.find(i=>i.id===d.editTask); editTask=t.id;
-    if(location.hash!=="#inicio") location.hash="inicio";
+    if(view!=="inicio") location.hash="tareas";
     $("#task-text").value=t.text; $("#task-date").value=t.date||""; taskCat=catOf(t); renderCats();
     formMode="tarea"; renderMode(); $("#f-task-title").textContent="Editar tarea"; $("#f-task-title").hidden=false; $("#task-submit").textContent="Guardar cambios"; $("#task-cancel").hidden=false;
     setTimeout(()=>{ $("#f-task").scrollIntoView({behavior:"smooth"}); $("#task-text").focus(); }, 50); }
   else if(d.editEv){ const t=items.find(i=>i.id===d.editEv); editEv=t.id;
-    if(location.hash!=="#inicio") location.hash="inicio"; formMode="evento"; renderMode();
+    if(view!=="eventos") location.hash="eventos";
     $("#ev-text").value=t.text; $("#ev-date").value=t.date; $("#ev-time").value=t.time||""; $("#ev-place").value=t.place||""; $("#ev-type").value=t.type; picked=[...(t.people||[])]; renderPeople();
     $("#f-ev-title").textContent="Editar evento"; $("#f-ev-title").hidden=false; $("#ev-submit").textContent="Guardar cambios"; $("#ev-cancel").hidden=false;
     setTimeout(()=>{ $("#f-ev").scrollIntoView({behavior:"smooth"}); $("#ev-text").focus(); }, 50); }

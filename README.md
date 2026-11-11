@@ -4,7 +4,10 @@ Agenda personal de tareas y eventos, en una sola página web (HTML y JavaScript,
 
 ## Qué hace
 
-**Notas rápidas** (primera pantalla)
+**Menú de inicio**: al abrir la app aparecen cuatro secciones con su cantidad: Notas, Notas de HD Maq., Tareas y Eventos.
+
+**Notas rápidas** (dos libretas: personales y de trabajo de HD Máquinas Ópticas)
+- Una nota se puede mover de una libreta a la otra.
 - Se escriben o se dictan, sin fecha ni prioridad. Cada una guarda el día en que se anotó.
 - Lista en letra chica, la más nueva arriba, con buscador y notas fijadas arriba.
 - Se tachan y pasan a Terminadas. Una nota se puede pasar a tarea o a evento.

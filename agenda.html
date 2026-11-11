@@ -501,7 +501,7 @@ function renderHome(tasks, evs){
     ["notas", BOOKS.personal.title, BOOKS.personal.sub, notes("personal"), BOOKS.personal.c],
     ["hd", BOOKS.hd.title, BOOKS.hd.sub, notes("hd"), BOOKS.hd.c],
     ["tareas", "Tareas", tsub, pend.length, "--danger"],
-    ["eventos", "Eventos", next.length ? `Próximo: ${fmtShort(next[0].date)} · ${esc(next[0].text.slice(0,36))}${next[0].text.length>36?"…":""}` : "Sin eventos próximos", next.length, "--t-discusion"],
+    ["eventos", "Eventos", next.length ? `Próximo: ${fmtShort(next[0].date)} · ${esc(next[0].text.slice(0,36))}${next[0].text.length>36?"…":""}` : (evs.length ? `Sin eventos próximos · ${evs.length} pasado${evs.length>1?"s":""}` : "Sin eventos"), evs.length, "--t-discusion"],
   ];
   $("#home-menu").innerHTML = rows.map(([h,t,sub,num,c])=>`<a href="#${h}" style="--c:var(${c})"><span class="mt"><b>${t}</b><span>${sub}</span></span><span class="num">${num}</span><span class="arrow" aria-hidden="true">›</span></a>`).join("");
 }

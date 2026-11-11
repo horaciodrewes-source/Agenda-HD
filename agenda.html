@@ -137,6 +137,12 @@ ul.notes{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .note .tick{min-height:0;width:34px;height:34px;padding:0;border:0;background:none;display:grid;place-items:center;flex:none;color:var(--muted)}
 .note .tick span{width:18px;height:18px;border:2px solid currentColor;border-radius:50%;display:block}
 .note.done .tick span{background:var(--ok);border-color:var(--ok)}
+.note .grip{flex:none;width:36px;align-self:stretch;display:grid;place-items:center;color:var(--muted);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.note .grip svg{width:18px;height:18px}
+.note.dragging{position:relative;z-index:3;background:var(--surface);box-shadow:0 6px 18px rgba(0,0,0,.18);border-radius:8px;transition:none}
+.note.dragging .grip{cursor:grabbing}
+.note.shift{transition:transform .15s ease}
+@media (prefers-reduced-motion:reduce){.note.shift{transition:none}}
 .note .ntext{flex:1;min-width:0;min-height:0;text-align:left;border:0;background:none;padding:7px 2px 7px 0;font-weight:400;display:flex;gap:8px;align-items:baseline}
 .note .t{flex:1;min-width:0;font-size:17px;line-height:1.3;white-space:pre-wrap;overflow-wrap:anywhere}
 .note .nd{flex:none;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -662,20 +668,62 @@ function renderTop(tasks){
   } else if(view==="inicio") L.innerHTML=`<a href="#notas" class="back">← Notas</a>`;
   else L.innerHTML="";
 }
+/* Orden manual de las notas: cada nota tiene un número "order"; las que no lo tienen van por fecha, la más nueva arriba. */
+const noteKey = n => n.order ?? -(n.created||0);
+let shownPend = [], drag = null;
+function moveNote(id, to){
+  const arr = shownPend.slice(), from = arr.findIndex(n=>n.id===id); if(from<0) return;
+  to = Math.max(0, Math.min(arr.length-1, to)); if(to===from) return;
+  const [n] = arr.splice(from,1); arr.splice(to,0,n);
+  let prev = arr[to-1], next = arr[to+1];
+  if(prev && !!prev.pinned !== !!n.pinned) prev = null;
+  if(next && !!next.pinned !== !!n.pinned) next = null;
+  const order = prev && next ? (noteKey(prev)+noteKey(next))/2 : prev ? noteKey(prev)+1 : next ? noteKey(next)-1 : noteKey(n);
+  store.put({...n, order});
+}
+$("#note-list").addEventListener("pointerdown", e=>{
+  const g = e.target.closest("[data-grip]"); if(!g) return;
+  e.preventDefault();
+  const lis = [...$("#note-list").querySelectorAll(":scope > li.note")], li = g.closest("li");
+  drag = {id:g.dataset.grip, li, lis, y0:e.clientY, from:lis.indexOf(li), rects:lis.map(x=>x.getBoundingClientRect())};
+  drag.to = drag.from; li.classList.add("dragging"); lis.forEach(x=>{ if(x!==li) x.classList.add("shift"); });
+  try{ g.setPointerCapture(e.pointerId); }catch{}
+});
+document.addEventListener("pointermove", e=>{
+  if(!drag) return;
+  const {li, lis, rects, from} = drag, dy = e.clientY - drag.y0, h = rects[from].height, mid = rects[from].top + h/2 + dy;
+  li.style.transform = `translateY(${dy}px)`;
+  let to = 0; rects.forEach((r,i)=>{ if(i!==from && mid > r.top + r.height/2) to++; });
+  drag.to = to;
+  lis.forEach((x,i)=>{ if(x===li) return;
+    x.style.transform = (from<to && i>from && i<=to) ? `translateY(${-h}px)` : (to<from && i>=to && i<from) ? `translateY(${h}px)` : ""; });
+  if(e.clientY < 70) scrollBy(0,-8); else if(e.clientY > innerHeight-50) scrollBy(0,8);
+});
+function endDrag(){
+  if(!drag) return;
+  const {id, from, to, lis} = drag; drag = null;
+  lis.forEach(x=>{ x.style.transform=""; x.classList.remove("dragging","shift"); });
+  if(to!==from) moveNote(id, to);
+}
+document.addEventListener("pointerup", endDrag);
+document.addEventListener("pointercancel", endDrag);
+
 function noteRow(n){
   const open=openNote===n.id;
   const acts = !open ? "" : n.done
     ? `<div class="acts"><button data-note-undo="${n.id}">Volver a pendientes</button>${confirmDel===n.id?`<button class="danger solid" data-del-yes="${n.id}">Sí, borrar</button><button class="ghost" data-del-no>No</button>`:`<button class="danger" data-del="${n.id}">Borrar</button>`}</div>`
-    : `<div class="acts"><button data-note-edit="${n.id}">Editar</button><button data-note-pin="${n.id}">${n.pinned?"Desfijar":"Fijar arriba"}</button><button data-note-task="${n.id}">Pasar a tarea</button><button data-note-ev="${n.id}">Pasar a evento</button></div>`;
+    : `<div class="acts"><button data-note-up="${n.id}" aria-label="Subir">↑ Subir</button><button data-note-down="${n.id}" aria-label="Bajar">↓ Bajar</button><button data-note-edit="${n.id}">Editar</button><button data-note-pin="${n.id}">${n.pinned?"Desfijar":"Fijar arriba"}</button><button data-note-task="${n.id}">Pasar a tarea</button><button data-note-ev="${n.id}">Pasar a evento</button></div>`;
   return `<li class="note ${n.done?"done":""} ${n.pinned&&!n.done?"pinned":""}"><div class="row">
     <button class="tick" ${n.done?`data-note-undo="${n.id}" aria-label="Volver a pendientes"`:`data-note-done="${n.id}" aria-label="Tachar nota"`}><span></span></button>
     <button class="ntext" data-note-open="${n.id}" aria-expanded="${open}"><span class="t">${n.pinned&&!n.done?'<span class="pin">★</span>':""}${esc(n.text)}</span><span class="nd">${fmtNoteDate(n.created)}</span></button>
+    ${n.done?"":`<span class="grip" data-grip="${n.id}" title="Arrastrar para mover" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span>`}
   </div>${acts}</li>`;
 }
 function renderNotes(){
   const q=noteQ.trim().toLowerCase();
   const all=items.filter(i=>i.kind==="note" && (!q || i.text.toLowerCase().includes(q)));
-  const pend=all.filter(n=>!n.done).sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0) || (b.created||0)-(a.created||0));
+  const pend=all.filter(n=>!n.done).sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0) || noteKey(a)-noteKey(b));
+  shownPend = pend;
   const done=all.filter(n=>n.done).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
   $("#note-list").innerHTML = pend.length ? pend.map(noteRow).join("") : `<li class="empty" style="margin-top:10px"><strong>${q?"Ninguna nota coincide":"No hay notas pendientes"}</strong>${q?"Probá con otra palabra.":"Escribí o dictá una arriba y tocá “Guardar nota”."}</li>`;
   $("#notes-done-toggle").textContent = showDoneNotes ? "Ocultar terminadas" : `Ver terminadas (${done.length})`;
@@ -700,6 +748,8 @@ function noteClick(b,d){
   if(d.noteOpen){ openNote = openNote===d.noteOpen ? null : d.noteOpen; confirmDel=null; renderNotes(); }
   else if(d.noteDone){ const x=n(d.noteDone); openNote=null; store.put({...x, done:true, doneAt:Date.now()}); toast("Pasó a Terminadas"); }
   else if(d.noteUndo){ const x=n(d.noteUndo); openNote=null; store.put({...x, done:false}); toast("Volvió a pendientes"); }
+  else if(d.noteUp){ const i=shownPend.findIndex(x=>x.id===d.noteUp); moveNote(d.noteUp, i-1); }
+  else if(d.noteDown){ const i=shownPend.findIndex(x=>x.id===d.noteDown); moveNote(d.noteDown, i+1); }
   else if(d.notePin){ const x=n(d.notePin); openNote=null; store.put({...x, pinned:!x.pinned}); }
   else if(d.noteEdit){ const x=n(d.noteEdit); editNote=x.id; openNote=null; $("#note-text").value=x.text; $("#f-note-title").hidden=false;
     $("#note-submit").textContent="Guardar cambios"; $("#note-cancel").hidden=false; renderNotes(); scrollTo({top:0,behavior:"smooth"}); $("#note-text").focus(); }
